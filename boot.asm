@@ -10,7 +10,7 @@ DispStr:
 	mov cx, 16
 	mov ax, 01301h
 	mov bx, 000ch
-	mov dl, 0
+	mov dx, 0
 	int 10h
 	ret
 BootMessage:	db	"Hello, OS world!"
