@@ -16,6 +16,8 @@ OffsetOfLoader	equ	0100h	; LOADER.BIN 被加载到的位置 ---- 偏移地址
 RootDirSectors		equ	1	; 根目录占用空间,这里暂时设置为1，即根目录最多存放32个文件.
 SectorNoOfRootDirectory	equ	19	; Root Directory 的第一个扇区号
 SecPerTrk		equ	18	;每磁道扇区数
+BlockSize 		equ	512	;每块512字节
+InodeSize		equ	32	;每个inode大小为32字节 	
 ;================================================================================================
 
 LABEL_START:	
@@ -42,6 +44,9 @@ LABEL_SEARCH_IN_ROOT_DIR_BEGIN:
 	mov	ax, 1
 	mov	cl, 1
 	call	ReadSector		;读取元数据到 BaseOfLoader:OffsetOfLoader指向的缓冲区中
+	mov	dx, [es:bx + 19]		
+	add	dx, 1
+	mov	word [istart], dx 	;[istart]存放inode起始块号
 
 	mov	ax, [es:bx + 23]		;ax<-元数据区中的数据区开始扇区号
 	add	ax, 1 			;元数据中的扇区号是没有包含引导扇区的，而且从0开始算,所以要加1。
@@ -90,9 +95,27 @@ LABEL_NO_LOADERBIN:
 %endif
 
 LABEL_FILENAME_FOUND:			; 找到 LOADER.BIN 后便来到这里继续
+	and	di, 0FFF0h			;di &= FFF0 为了让它指向本条目开头
+	add	di, 14				;目录文件中14为i-node号起始偏移地址
+	mov	ax, [es:di]			;ax<-文件的i-node号
+	mov	dh, InodeSize
+	mul	dh
+	mov	dh, BlockSize
+	div	dh				;ah = 块内字节偏移, al = inode所在inode块相对与istart的块号（0开始）
+	mov	dh, ah
+	xor	ah, ah
+	add	ax, [istart]			;ax=文件inode所在的块
+	mov	cl, 1
+	mov	cx, BaseOfLoader
+	mov	es, cx
+	mov	bx, OffsetOfLoader
+	call	ReadSector
+
+	
+
 
 LABEL_FILE_LOADED:
-
+	
 	mov	dh, 1			; "Ready."
 	call	DispStr			; 显示字符串
 
@@ -116,7 +139,7 @@ LABEL_FILE_LOADED:
 wRootDirSizeForLoop	dw	RootDirSectors	; Root Directory 占用的扇区数, 在循环中会递减至零.
 wSectorNo		dw	0		; 要读取的扇区号
 bOdd			db	0		; 奇数还是偶数
-
+istart			dw	0 		;inode起始块编号
 ;============================================================================
 ;字符串
 ;----------------------------------------------------------------------------
@@ -132,7 +155,10 @@ Message2		db	"No LOADER"; 9字节, 不够则用空格补齐. 序号 2
 ; 函数名: copyContentInDirectIndex
 ;----------------------------------------------------------------------------
 ; 作用:
-;	
+;	将直接索引块复制到es:bx指向空间，并且将BX指向下一个空白位置
+
+
+
 
 ;----------------------------------------------------------------------------
 ; 函数名: DispStr
