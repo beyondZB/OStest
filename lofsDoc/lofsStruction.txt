@@ -1,0 +1,6 @@
+0		boot sector
+1(0)		meta data
+2(1)		free block map
+3(2)		free i-node map
+4-21(3-20)	inode
+22-...(21-...)	data
