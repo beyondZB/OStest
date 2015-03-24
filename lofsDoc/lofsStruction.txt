@@ -4,3 +4,12 @@
 3(2)		free i-node map
 4-21(3-20)	inode
 22-...(21-...)	data
+
+
+0		boot sector
+1-2		embedded sector
+3(0)		meta data
+4(1)		free block map
+5(2)		free i-node map
+6-23(3-20)	inode
+24-...(21-...)	data
