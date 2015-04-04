@@ -981,7 +981,7 @@ _szRAMSize:	db "RAM size:", 0
 _szReturn:	db 0Ah, 0
 ;; 变量
 _dwMCRNumber:	dd 0	; Memory Check Result
-_dwDispPos:	dd (80 * 9 + 0) * 2	; 屏幕第 6 行, 第 0 列。
+_dwDispPos:	dd (80 * 9 + 0) * 2	; 屏幕第 9 行, 第 0 列。
 _dwMemSize:	dd 0
 _ARDStruct:	; Address Range Descriptor Structure
   _dwBaseAddrLow:		dd	0

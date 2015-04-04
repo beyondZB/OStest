@@ -16,6 +16,8 @@ disp_str:
 	push	ebp
 	mov	ebp, esp
 
+	cmp	dword [disp_pos], (80 * 26 + 0) * 2
+	jae	.4
 	mov	esi, [ebp + 8]	; pszInfo
 	mov	edi, [disp_pos]
 	mov	ah, 0Fh
@@ -43,7 +45,7 @@ disp_str:
 
 .2:
 	mov	[disp_pos], edi
-
+.4:
 	pop	ebp
 	ret
 

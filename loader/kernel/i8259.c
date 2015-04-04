@@ -37,8 +37,7 @@ PUBLIC void init_8259A()
 	out_byte(INT_S_CTLMASK, 0x1);
 
 	/* Master 8259, OCW1 */
-	//0xFD取消IR1即键盘中断的屏蔽
-	out_byte(INT_M_CTLMASK, 0xFF);
+	out_byte(INT_M_CTLMASK, 0xFE);
 
 	/* Slave 8259, OCW1 */
 	out_byte(INT_S_CTLMASK, 0xFF);

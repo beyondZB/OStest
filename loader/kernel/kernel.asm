@@ -5,6 +5,9 @@ extern	cstart
 extern	exception_handler
 extern	spurious_irq
 extern	kernel_main
+extern	disp_str
+extern	delay
+extern	clock_handler
 
 ;导入全局变量gdt_ptr(全局描述符表指针)
 extern gdt_ptr
@@ -13,6 +16,7 @@ extern idt_ptr
 extern p_proc_ready
 extern tss
 extern disp_pos
+extern k_reenter
 
 [SECTION .bss]
 StackSpace	resb	2 * 1024
@@ -102,6 +106,61 @@ csinit:		;"这个跳转指令强制使用刚刚初始化的结构"
 
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
+	sub	esp, 4
+	pushad		;'.
+	push	ds	; |
+	push	es	; |保存原寄存器值
+	push	fs	; |这里也就是在保存进程表中的寄存器信息
+	push	gs	;/
+	sti
+	mov	dx, ss	
+	mov	ds, dx	
+	mov	es, dx	
+
+
+	inc	byte [gs:0]		;改变屏幕第０行，第０列的字符
+
+	mov	al, EOI			;reenable
+	out	INT_M_CTL, al		;master 8259
+
+	inc	dword [k_reenter]
+	cmp	dword [k_reenter], 0
+	jne	.re_enter
+
+	mov	esp, StackTop		;-------切到内核栈
+
+	sti	;打开中断
+
+	push	0
+	call	clock_handler
+	add	esp, 4
+	cli	;关闭中断
+
+	mov	esp, [p_proc_ready]	;-------离开内核栈，esp指向进程表
+	lldt	[esp + P_LDT_SEL]	;载入LDT
+
+;	push	clock_int_msg
+;	call	disp_str
+;	add	esp, 4
+
+;	push	9999	
+;	call	delay
+;	add	esp, 4
+
+	lea	eax, [esp + P_STACKTOP]
+	mov	dword [tss + TSS3_S_SP0], eax
+	
+	cli
+
+.re_enter:		;若(k_reenter != 0),会跳到这里
+	dec	dword [k_reenter]
+	pop	gs		;'.
+	pop	fs		; |
+	pop	es		; |恢复原寄存器的值
+	pop	ds		; |
+	popad			;/
+	add	esp, 4
+
 	iretd
 
 ALIGN   16
@@ -268,4 +327,4 @@ restart:
 
 	add	esp, 4
 
-	iretd
+	iretd				;跳转到指定进程

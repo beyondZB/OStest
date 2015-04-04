@@ -160,11 +160,20 @@ PUBLIC void init_prot()
 
 
 	//填充GDT中的LDT描述符
-	init_descriptor(&gdt[INDEX_LDT_FIRST],
-			vir2phys( seg2phys(SELECTOR_KERNEL_DS), proc_table[0].ldts ),
-			LDT_SIZE * sizeof(DESCRIPTOR) - 1,
-			DA_LDT
-	);
+	int i;
+	PROCESS* p_proc = proc_table;
+	u16 index_ldt = INDEX_LDT_FIRST;
+	
+	for(i = 0; i < NR_TASKS; i++)
+	{
+		init_descriptor(&gdt[index_ldt],
+				vir2phys( seg2phys(SELECTOR_KERNEL_DS), proc_table[0].ldts ),
+				LDT_SIZE * sizeof(DESCRIPTOR) - 1,
+				DA_LDT
+		);
+		p_proc++;
+		index_ldt += 1;
+	}
 }
 
 //=================================================
