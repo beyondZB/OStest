@@ -50,10 +50,17 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;			//在GDT增加一个LDT描述符
 	}
 
-	k_reenter = -1;
+	k_reenter = 0;
+	ticks = 0;
 
 	p_proc_ready	= proc_table;
-	restart();
+
+
+	init_clock();
+	init_keyboard();
+
+
+	restart();					//跳转到准备好的进程中
 	
 
 	while(1){}
@@ -65,9 +72,9 @@ void TestA()
 	int i = 0;
 	while(1){
 		disp_str("A");
-		disp_int(i++);
+		disp_int(system_call(0, 0, 0, 0, 0, 0));
 		disp_str(".");
-		delay(555);
+		milli_delay(1000);
 	}
 }
 
@@ -79,6 +86,6 @@ void TestB()
 		disp_str("B");
 		disp_int(i++);
 		disp_str(".");
-		delay(555);
+		milli_delay(1000);
 	}
 }

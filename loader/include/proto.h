@@ -17,3 +17,27 @@ void restart();
 /* main.c */
 void TestA();
 void TestB();
+
+
+/* i8259.c */
+PUBLIC void spurious_irq(int irq);
+
+
+/* clock.c */
+PUBLIC void clock_handler(int irq); 
+PUBLIC void milli_delay(int milli_sec);
+
+/* 以下为系统调用相关 */
+/* proc.c */
+PUBLIC	int	sys_get_ticks();	/* sys_call */
+
+/* syscall.asm */
+PUBLIC	void	sys_call();		/* int_handler */
+PUBLIC	int	get_ticks();
+PUBLIC	int	system_call(u32 eax, u32 edx,u32 esi, u32 edi, u32 ecx, u32 ebx);
+
+
+
+/* keyboard.c */
+PUBLIC void keyboard_handler(int irq);
+PUBLIC void init_keyboard();

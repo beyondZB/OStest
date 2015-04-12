@@ -17,6 +17,11 @@ extern p_proc_ready
 extern tss
 extern disp_pos
 extern k_reenter
+extern irq_table
+extern sys_call_table
+
+
+bits	32
 
 [SECTION .bss]
 StackSpace	resb	2 * 1024
@@ -44,6 +49,7 @@ global stack_exception
 global general_protection
 global page_fault
 global copr_error
+global sys_call
 
 ;硬件中断HardWare Interruption
 global  hwint00
@@ -97,71 +103,32 @@ csinit:		;"这个跳转指令强制使用刚刚初始化的结构"
 ; 中断和异常 -- 硬件中断
 ; ---------------------------------
 %macro  hwint_master    1
-        push    %1
-        call    spurious_irq
-        add     esp, 4
-        hlt
+	call	save
+
+	in	al, INT_M_CTLMASK	;'.
+	or	al, (1 << %1)		; |屏蔽当前中断
+	out	INT_M_CTLMASK, al	;/
+	
+	mov	al, EOI			;'.置EOI位
+	out	INT_M_CTL, al		;/
+
+	sti			;CPU在响应中断的过程中会自动关闭中断,这句之后就允许响应新的中断
+	push	%1
+	call	[irq_table + 4 * %1]
+	pop	ecx
+	cli			;关中断
+
+	in	al, INT_M_CTLMASK
+	and	al, ~(1 << %1)
+	out	INT_M_CTLMASK, al
+	ret
 %endmacro
 ; ---------------------------------
 
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
-	sub	esp, 4
-	pushad		;'.
-	push	ds	; |
-	push	es	; |保存原寄存器值
-	push	fs	; |这里也就是在保存进程表中的寄存器信息
-	push	gs	;/
-	sti
-	mov	dx, ss	
-	mov	ds, dx	
-	mov	es, dx	
-
-
-	inc	byte [gs:0]		;改变屏幕第０行，第０列的字符
-
-	mov	al, EOI			;reenable
-	out	INT_M_CTL, al		;master 8259
-
-	inc	dword [k_reenter]
-	cmp	dword [k_reenter], 0
-	jne	.re_enter
-
-	mov	esp, StackTop		;-------切到内核栈
-
-	sti	;打开中断
-
-	push	0
-	call	clock_handler
-	add	esp, 4
-	cli	;关闭中断
-
-	mov	esp, [p_proc_ready]	;-------离开内核栈，esp指向进程表
-	lldt	[esp + P_LDT_SEL]	;载入LDT
-
-;	push	clock_int_msg
-;	call	disp_str
-;	add	esp, 4
-
-;	push	9999	
-;	call	delay
-;	add	esp, 4
-
-	lea	eax, [esp + P_STACKTOP]
-	mov	dword [tss + TSS3_S_SP0], eax
-	
-	cli
-
-.re_enter:		;若(k_reenter != 0),会跳到这里
-	dec	dword [k_reenter]
-	pop	gs		;'.
-	pop	fs		; |
-	pop	es		; |恢复原寄存器的值
-	pop	ds		; |
-	popad			;/
-	add	esp, 4
-
-	iretd
+	inc	byte [gs:0]
+	hwint_master	0
 
 ALIGN   16
 hwint01:                ; Interrupt routine for irq 1 (keyboard)
@@ -298,33 +265,75 @@ exception:
 	add	esp, 4 * 2	;让栈顶指向EIP,堆栈中从顶向下依次是:EIP,CS,EFLAGS
 	hlt
 
+;==========================================================
+;		save
+;==========================================================
+save:
+	pushad		;'.
+	push	ds	; |
+	push	es	; |保存原寄存器值
+	push	fs	; |这里也就是在保存进程表中的寄存器信息
+	push	gs	;/
+	mov	[tempesi], esi
+	mov	si, ss	
+	mov	ds, si	
+	mov	es, si	
 
-;restart:
-;	mov	esp, [p_proc_ready]			;p_proc_ready是指向进程表（PCB）的指针，存放着下一个启动进程的进程表得知
-;	lldt	[esp + P_LDT_SEL]			;设置ldtr
-;	lea	eax, [esp + P_STACKTOP]			;s_proc
-;	mov	dword [tss + TSS3_S_SP0], eax		;设置TSS的stacktop
-;restart_reenter:
-;	dec	dword [k_reenter]			
-;	pop	gs
-;	pop	fs
-;	pop	es
-;	pop	ds
-;	popad						;pop all double
-;	add	esp, 4					;跳过retaddr以便执行iretd,之前的堆栈内容正好是eip,cs,eflags,esp,ss
-;	iretd						;跳到指定进程执行
-restart:
+	mov	esi, esp	;eax = 进程表的起始地址
+
+	inc	dword [k_reenter]		;k_reenter++;
+	cmp	dword [k_reenter], 0		;if(k_reenter == 0)
+	jne	.1				;{
+	mov	esp, StackTop			;	切换到内核栈
+
+	push	restart				;	push	restart
+	jmp	[esi + RETADR - P_STACKBASE]	;	return
+
+.1:						;}else{ 已经在内核栈中,不需要切换
+	push	restart_reenter			;	push	restart_reenter
+	jmp	[esi + RETADR - P_STACKBASE]	;	return
+						;}
+;===================由于堆栈变化,临时存储寄存器esi的值=====================
+	tempesi	dd	0
+;==========================================================================
+sys_call:
+	call	save
+
+	sti
+	;穿参数给相应的系统调用
+	push	ebx
+	push	ecx
+	push	edi
+	push	dword [tempesi]
+	push	edx	
+
+	call	[sys_call_table + eax * 4]
+
+	add	esp, 20					;恢复堆栈
+	mov	[esi + EAXREG - P_STACKBASE], eax	;将存放返回值的eax存入tss中,以便恢复进程的时候eax中存放着正确的返回值
+	
+	cli
+
+	ret
+	
+
+;==========================================================
+;		restart
+;==========================================================
+restart:					;若不是重入中断则切换进程
 	mov	esp, [p_proc_ready]
 	lldt	[esp + P_LDT_SEL]
 	lea	eax, [esp + P_STACKTOP]
 	mov	dword [tss + TSS3_S_SP0], eax
 
-	pop	gs
-	pop	fs
-	pop	es
-	pop	ds
-	popad
+restart_reenter:				;若是重入终端则不切换进程
+	dec	dword [k_reenter]
+	pop	gs	;'.
+	pop	fs	; |
+	pop	es	; |恢复寄存器值
+	pop	ds	; |
+	popad		;/
 
-	add	esp, 4
+	add	esp, 4	;跳过指向retstart或restart_reenter的指针
 
 	iretd				;跳转到指定进程

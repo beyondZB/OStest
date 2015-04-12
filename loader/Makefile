@@ -26,7 +26,8 @@ DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 BOOT 		= boot/mbr boot/findLoader boot/LOADER.BIN
 KERNEL 		= kernel/KERNEL.BIN
 OBJS 		= kernel/kernel.o kernel/start.o lib/kliba.o lib/klib.o lib/string.o\
-		  kernel/i8259.o kernel/global.o kernel/protect.o kernel/main.o kernel/clock.o
+		  kernel/i8259.o kernel/global.o kernel/protect.o kernel/main.o \
+		  kernel/clock.o kernel/proc.o kernel/syscall.o kernel/keyboard.o
 DASMOUTPUT	= kernel.bin.asm
 
 .PHONY: everything final image clean realclean  all buildImg
@@ -102,7 +103,19 @@ kernel/global.o: kernel/global.c include/type.h include/const.h include/protect.
 kernel/clock.o: kernel/clock.c include/type.h include/const.h include/protect.h \
 		 include/proto.h include/global.h include/proc.h
 	$(CC) $(CFLAGS) -o $@ $<
- 
+
+kernel/keyboard.o: kernel/keyboard.c include/type.h include/const.h include/protect.h \
+		 include/proto.h include/global.h include/proc.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/proc.o: kernel/proc.c /usr/include/stdc-predef.h include/type.h \
+ 		include/const.h include/protect.h include/proto.h include/string.h \
+		include/proc.h include/global.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/syscall.o: kernel/syscall.asm
+	$(ASM) $(ASMKFLAGS) -o $@ $<
+
 
 lib/kliba.o: lib/kliba.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
