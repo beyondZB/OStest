@@ -1,0 +1,4 @@
+键盘中断没有处理pause键(6位扫描码)
+笔记本上测出来的prntscr(makecode:0xE0, 0xB7  breakcode:0xE0, 0xAA ,makecode和breakcode并不是一般的相差0x80的关系)
+这两个键暂时没有处理
+

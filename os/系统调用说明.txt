@@ -1,0 +1,6 @@
+kernelFun	各个内核模块之间的接口
+sysFun		系统调用的内核版本
+fun		系统调用的用户版本
+
+
+sysFun和fun往往充当转接口的角色
