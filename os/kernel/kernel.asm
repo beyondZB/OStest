@@ -8,12 +8,16 @@ extern	kernel_main
 extern	disp_str
 extern	delay
 extern	clock_handler
+extern	kernelSchedule
+extern	disp_int
+
 
 ;导入全局变量gdt_ptr(全局描述符表指针)
 extern gdt_ptr
 ;导入全局变量idt_ptr(中断描述符表)
 extern idt_ptr
 extern p_proc_ready
+extern p_proc_running
 extern tss
 extern disp_pos
 extern k_reenter
@@ -31,6 +35,8 @@ StackTop:	;栈顶
 
 global _start	;导出_start(程序入口)
 global restart
+global save
+global kernelShift
 
 ;中断处理函数
 global divide_error
@@ -112,11 +118,11 @@ csinit:		;"这个跳转指令强制使用刚刚初始化的结构"
 	mov	al, EOI			;'.置EOI位
 	out	INT_M_CTL, al		;/
 
-	sti			;CPU在响应中断的过程中会自动关闭中断,这句之后就允许响应新的中断
+	sti	;CPU在响应中断的过程中会自动关闭中断,这句之后就允许响应新的中断-------
 	push	%1
 	call	[irq_table + 4 * %1]
 	pop	ecx
-	cli			;关中断
+	cli	;关中断---------------------------------------------------------------
 
 	in	al, INT_M_CTLMASK
 	and	al, ~(1 << %1)
@@ -160,10 +166,32 @@ hwint07:                ; Interrupt routine for irq 7 (printer)
 
 ; ---------------------------------
 %macro  hwint_slave     1
-        push    %1
-        call    spurious_irq
-        add     esp, 4
-        hlt
+	call	save
+
+	in	al, INT_S_CTLMASK	;'.
+	or	al, (1 << (%1 - 8))	; |屏蔽当前中断
+	out	INT_S_CTLMASK, al	;/
+
+	mov	al, EOI			;置EOI位(master)
+	out	INT_M_CTL, al
+	
+	nop
+	out	INT_S_CTL, al		;置EOI位(slave)
+	;一定要注意:slave和master都要置EOI
+
+	sti	;CPU在响应中断的过程中会自动关闭终端,这句之后就允许响应新的中断-----------------------
+
+	push	%1			;'.
+	call	[irq_table + 4 * %1]	; |中断处理程序
+	pop	ecx			;/
+
+	cli	;关中断-------------------------------------------------------------------------------
+
+	in	al, INT_S_CTLMASK	;'.
+	and	al, ~(1 << (%1 - 8))	; |回复接受当前中断
+	out	INT_S_CTLMASK, al	;/
+
+	ret
 %endmacro
 ; ---------------------------------
 
@@ -274,12 +302,11 @@ save:
 	push	es	; |保存原寄存器值
 	push	fs	; |这里也就是在保存进程表中的寄存器信息
 	push	gs	;/
-	mov	[tempesi], esi
 	mov	si, ss	
 	mov	ds, si	
 	mov	es, si	
 
-	mov	esi, esp	;eax = 进程表的起始地址
+	mov	esi, esp	;esi = 进程表的起始地址
 
 	inc	dword [k_reenter]		;k_reenter++;
 	cmp	dword [k_reenter], 0		;if(k_reenter == 0)
@@ -293,38 +320,16 @@ save:
 	push	restart_reenter			;	push	restart_reenter
 	jmp	[esi + RETADR - P_STACKBASE]	;	return
 						;}
-;===================由于堆栈变化,临时存储寄存器esi的值=====================
-	tempesi	dd	0
-;==========================================================================
-sys_call:
-	call	save
-
-	sti
-	;穿参数给相应的系统调用
-	push	ebx
-	push	ecx
-	push	edi
-	push	dword [tempesi]
-	push	edx	
-
-	call	[sys_call_table + eax * 4]
-
-	add	esp, 20					;恢复堆栈
-	mov	[esi + EAXREG - P_STACKBASE], eax	;将存放返回值的eax存入tss中,以便恢复进程的时候eax中存放着正确的返回值
-	
-	cli
-
-	ret
-	
 
 ;==========================================================
 ;		restart
 ;==========================================================
 restart:					;若不是重入中断则切换进程
-	mov	esp, [p_proc_ready]
-	lldt	[esp + P_LDT_SEL]
-	lea	eax, [esp + P_STACKTOP]
-	mov	dword [tss + TSS3_S_SP0], eax
+	mov	esp, [p_proc_ready]		;p_proc_ready在global.h声明,存放就绪进程的进程表地址,这条语句将esp转到就绪进程的进程表
+	mov	[p_proc_running], esp		;接下来就绪进程将要运行,所以现在运行进程指针p_proc_running指向就绪进程
+	lldt	[esp + P_LDT_SEL]		;载入进程表中的ldt选择子
+	lea	eax, [esp + P_STACKTOP]		
+	mov	dword [tss + TSS3_S_SP0], eax	;将tts中的sp0设置为就绪进程进程表的最高地址,下次进程进入内核态的时候esp就会指向这个进程表
 
 restart_reenter:				;若是重入终端则不切换进程
 	dec	dword [k_reenter]
@@ -337,3 +342,170 @@ restart_reenter:				;若是重入终端则不切换进程
 	add	esp, 4	;跳过指向retstart或restart_reenter的指针
 
 	iretd				;跳转到指定进程
+
+
+;===========================================================================
+proc_running_restart:
+	mov	esp, [p_proc_running]
+	pop	gs	;'.
+	pop	fs	; |
+	pop	es	; |恢复寄存器值
+	pop	ds	; |
+	popad		;/
+
+	add	esp, 4	;跳过指向retstart或restart_reenter的指针
+
+	iretd				;跳转到指定进程
+
+
+;==========================================================
+;		kernelShift
+;==========================================================
+kernelShift:
+	push	eax		;保存eax的值
+	mov	eax, [esp + 4]	;取得返回地址
+	mov	[dest], eax	;保存返回地址
+	pop	eax		;恢复eax的值
+	add	esp, 4		;由于kernelBlock之后会进行进程切换并不会返回,为了保证堆栈正确,将eip从栈中去除
+
+	;写进程表,保留现场
+	mov	[tempebx], ebx
+	mov	ebx, [p_proc_running]
+
+	mov	[tempeax], eax	;保存eax的值
+	mov	ax, gs
+	mov	[ebx + GSREG], ax
+	mov	ax, fs
+	mov	[ebx + FSREG], ax
+	mov	ax, es
+	mov	[ebx + ESREG], ax
+	mov	ax, ds
+	mov	[ebx + DSREG], ax
+	mov	[ebx + EDIREG], edi
+	mov	[ebx + ESIREG], esi
+	mov	[ebx + EBPREG], ebp
+	lea	eax, [ebx + RETADR]
+	mov	[ebx + KERNELESPREG], eax	;指向进程表中的RETADR位置
+	mov	eax, [tempebx]			;取出ebx的值到eax中
+	mov	[ebx + EBXREG], eax
+	mov	[ebx + EDXREG], edx
+	mov	[ebx + ECXREG], ecx
+	mov	eax, [tempeax]
+	mov	[ebx + EAXREG], eax
+	mov	dword [ebx + RETADR], 0		;用不到
+	mov	eax, [dest]
+	mov	[ebx + EIPREG], eax
+	mov	ax, cs
+	mov	[ebx + CSREG], ax
+	;取得eflags的值
+	pushfd
+	pop	eax
+	mov	[ebx + EFLAGSREG], eax
+	mov	[ebx + ESPREG], esp
+	mov	eax, ss
+	mov	[ebx + SSREG], eax
+
+	call	kernelSchedule	;选择将要调度的进程
+
+	;切换进程(不用restart的原因是restart中会dec[p_reenter])
+	mov	esp, [p_proc_ready]		;p_proc_ready在global.h声明,存放就绪进程的进程表地址,这条语句将esp转到就绪进程的进程表
+	mov	[p_proc_running], esp		;接下来就绪进程将要运行,所以现在运行进程指针p_proc_running指向就绪进程
+	lldt	[esp + P_LDT_SEL]		;载入进程表中的ldt选择子
+	lea	eax, [esp + P_STACKTOP]		
+	mov	dword [tss + TSS3_S_SP0], eax	;将tts中的sp0设置为就绪进程进程表的最高地址,下次进程进入内核态的时候esp就会指向这个进程表
+
+	jmp	proc_running_restart
+
+
+;---------------用于零时存储值------------------------------------------
+	dest	dd	0	;用于存储返回地址,用于给进程表的eip赋值
+	tempeax	dd	0
+	tempebx	dd	0
+;-----------------------------------------------------------------------
+
+
+
+;================================================================================================
+;				START	sys_call
+;================================================================================================
+
+;-------------------------------------------------
+;copy %1 byte from ds:esi to es:edi
+%macro	blockcpy	1
+	push	ecx
+	push	eax
+	push	esi
+	push	edi
+	pushfd
+
+	mov	ecx, %1
+	cld
+
+	rep 	movsb
+
+	popfd
+	pop	edi
+	pop	esi
+	pop	eax
+	pop	ecx
+%endmacro
+;--------------------------------------------------
+
+sys_call:	;syscall现在不调用save,因为syscall不应该处理重入问题,且应该将栈切换到进程内核栈
+	sub	esp, 4	;跳过retaddr
+	pushad		;'.
+	push	ds	; |
+	push	es	; |保存原寄存器值
+	push	fs	; |这里也就是在保存进程表中的寄存器信息
+	push	gs	;/
+	mov	[tempesi], esi
+	mov	si, ss	
+	mov	ds, si	
+	mov	es, si	
+
+	mov	esi, esp	;esi = 进程表的起始地址
+
+	mov	esp, [esi + TASKKERNELSTACK - P_STACKBASE]	;切换到内核栈
+;以上相当于save的内容
+	;将进程表中的内容保存到进程表备份中
+	push	edi
+	mov	edi, [esi + TASKREGSBACKUP - P_STACKBASE]
+	
+	blockcpy	TASKREGSBACKUP - P_STACKBASE + 4
+
+	pop	edi
+;以上保存进程现场,即写进程表和备份进程表
+
+	sti;------------------------------------------------------------------------
+	;穿参数给相应的系统调用
+	push	ebx
+	push	ecx
+	push	edi
+	push	dword [tempesi]
+	push	edx	
+
+	call	[sys_call_table + eax * 4]
+
+	add	esp, 20					;恢复堆栈
+
+	
+	cli;-------------------------------------------------------------------------
+
+;以下退出系统调用中断,恢复进程表,并依据进程表,还原现场
+	mov	edi, [p_proc_running]				
+	mov	[edi + EAXREG - P_STACKBASE], eax	;将存放返回值的eax存入进程表中,以便恢复进程的时候eax中存放着正确的返回值
+;	mov	[edi + TASKKERNELSTACK - P_STACKBASE], esp	;将进程内核栈的指针esp保存起来
+	mov	esi, [edi + TASKREGSBACKUP - P_STACKBASE]
+;	mov	[esi + TASKKERNELSTACK - P_STACKBASE],	esp	;将进程内核栈的指针保存到备份进程表
+	mov	[esi + EAXREG - P_STACKBASE], eax
+
+	blockcpy	TASKREGSBACKUP - P_STACKBASE + 4
+
+;以下相当于restart的内容
+	jmp	proc_running_restart
+;-------------------由于堆栈变化,临时存储寄存器esi的值---------------------
+	tempesi	dd	0
+;--------------------------------------------------------------------------
+;==============================================================================================================
+;					END	sys_call
+;==============================================================================================================

@@ -151,6 +151,8 @@ PUBLIC void init_prot()
 
 	init_idt_desc(INT_VECTOR_SYS_CALL,	DA_386IGate,
 			sys_call,		PRIVILEGE_USER);
+//	disp_str("syscall:");
+//	disp_int(sys_call);
 
 	/* 填充 GDT 中 TSS 这个描述符 */
 	memset(&tss, 0, sizeof(tss));

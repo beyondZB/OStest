@@ -82,6 +82,8 @@ PRIVATE bool is_decorative_key(VirtualKey key){
 PUBLIC void keyboard_handler(int irq)
 {
 	u8 scan_code = in_byte(KB_DATA);
+//	disp_int(scan_code);
+//	disp_str(" ");
 	VirtualKey key = '\0';
 	bool make = !(scan_code & FLAG_BREAK);
 	bool two_byte_code = FALSE;
@@ -150,13 +152,13 @@ PUBLIC void init_keyboard()
 	enable_irq(KEYBOARD_IRQ);				//打开键盘中断
 	
 	//清屏
-//	disp_pos = 0;
-//	int i = 0;
-//	for(i = 0; i < 80 * 25; i++)
-//	{
-//		disp_str(" ");
-//	}
-//	disp_pos = 0;
+	disp_pos = 0;
+	int i = 0;
+	for(i = 0; i < (80 * 25 + 0) * 2; i++)
+	{
+		disp_str(" ");
+	}
+	disp_pos = 80 * 7 * 2;
 }
 
 PUBLIC VirtualKey kernelReadKey()       /* 从vk缓冲区中读取下一个字节 */

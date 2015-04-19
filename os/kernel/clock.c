@@ -16,9 +16,22 @@ PUBLIC void clock_handler(int irq)
 		return;
 	}
 
-	p_proc_ready++;
-	if (p_proc_ready >= proc_table + NR_TASKS)
-		p_proc_ready = proc_table;
+	kernelSchedule();
+}
+
+PUBLIC void kernelSchedule()
+{
+	do{
+		p_proc_ready++;
+		if(p_proc_ready >= proc_table + NR_TASKS){
+			p_proc_ready = proc_table;
+		}
+	}while(p_proc_ready->state != PROC_STATE_READY);
+
+/* old process dispatch */
+//	p_proc_ready++;
+//	if (p_proc_ready >= proc_table + NR_TASKS)
+//		p_proc_ready = proc_table;
 }
 
 PUBLIC void milli_delay(int milli_sec)

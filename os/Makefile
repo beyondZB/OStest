@@ -27,7 +27,7 @@ BOOT 		= boot/mbr boot/findLoader boot/LOADER.BIN
 KERNEL 		= kernel/KERNEL.BIN
 OBJS 		= kernel/kernel.o kernel/start.o lib/kliba.o lib/klib.o lib/string.o\
 		  kernel/i8259.o kernel/global.o kernel/protect.o kernel/main.o \
-		  kernel/clock.o kernel/proc.o kernel/syscall.o kernel/keyboard.o kernel/api.o
+		  kernel/clock.o kernel/proc.o kernel/syscall.o kernel/keyboard.o kernel/api.o kernel/hd.o
 DASMOUTPUT	= kernel.bin.asm
 
 .PHONY: everything final image clean realclean  all buildImg
@@ -117,6 +117,9 @@ kernel/syscall.o: kernel/syscall.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
 kernel/api.o: kernel/api.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/hd.o: kernel/hd.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 lib/kliba.o: lib/kliba.asm

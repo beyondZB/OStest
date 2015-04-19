@@ -2,6 +2,7 @@
 #define CONST_H
 
 //EXTERN is defined as extern except in global.c
+//extern 提示编译器在其他模块中寻找定义
 #define EXTERN extern
 
 //函数类型
@@ -51,7 +52,7 @@
 #define	AT_WINI_IRQ	14	/* at winchester */
 
 /* system call */
-#define NR_SYS_CALL	2
+#define NR_SYS_CALL	5
 
 
 #define		TRUE	1
@@ -67,5 +68,10 @@
 #define KB_CMD		0x64	/* I/O port for keyboard command
 					Read : Read Status Register
 					Write: Write Input Buffer(8042 Command) */
+
+/* Hard Drive */
+#define SECTOR_SIZE		512
+#define SECTOR_BITS		(SECTOR_SIZE * 8)
+#define SECTOR_SIZE_SHIFT	9
 
 #endif /*CONST_H*/

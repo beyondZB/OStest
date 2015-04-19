@@ -1,5 +1,5 @@
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
-	u32	gs;		/* ┓						│			*/
+	u32	gs;		/* ┓stackbase					│			*/
 	u32	fs;		/* ┃						│			*/
 	u32	es;		/* ┃						│			*/
 	u32	ds;		/* ┃						│			*/
@@ -16,7 +16,9 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	cs;		/*  ┃						│			*/
 	u32	eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/
 	u32	esp;		/*  ┃						│			*/
-	u32	ss;		/*  ┛						┷High			*/
+	u32	ss;		/*  ┛stacktop					┷High			*/
+	u32	task_kernel_stack;
+	u32	task_regs_backup;
 }STACK_FRAME;
 
 /* s_proc也就是我们常说的进程表或者PCB,保存在堆栈中
@@ -26,17 +28,24 @@ typedef struct s_proc {
 
 	u16 ldt_sel;               /* gdt selector giving ldt base and limit */
 	DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
-
+	STACK_FRAME regs_backup;   /* backup for system call regs backing up*/
 
 	u32 pid;                   /* process id passed in from MM */
 	char p_name[16];           /* name of the process */
+	u8 state;		   /* the state of process.Three value: PROC_STATE_RUNNING, PROC_STATE_READY, PROC_STATE_BLOCKING */
 }PROCESS;
 
 typedef struct s_task{
 	task_f	initial_eip;
 	int	stacksize;
+	int	kernelStackSize;
 	char	name[32];
 }TASK;
+
+//state value
+#define PROC_STATE_RUNNING	0
+#define PROC_STATE_READY	1
+#define PROC_STATE_BLOCKING	2
 
 // number of tasks
 #define	NR_TASKS	2
@@ -45,7 +54,11 @@ typedef struct s_task{
 /* stacks of tasks */
 #define STACK_SIZE_TESTA	0x8000
 #define STACK_SIZE_TESTB	0x8000
+#define KERNEL_STACK_SIZE_TESTA	0x8000
+#define KERNEL_STACK_SIZE_TESTB	0x8000
 
 #define STACK_SIZE_TOTAL	(STACK_SIZE_TESTA + \
 				STACK_SIZE_TESTB)
 
+#define KERNEL_STACK_SIZE_TOTAL	(KERNEL_STACK_SIZE_TESTA + \
+				KERNEL_STACK_SIZE_TESTB)

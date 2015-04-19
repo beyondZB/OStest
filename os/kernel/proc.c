@@ -26,4 +26,35 @@ PUBLIC int kernelGetTicks()
 }
 
 
+//================================================
+//		kernelBlock
+//================================================
+PUBLIC void kernelBlock()
+{
+	p_proc_running->state = PROC_STATE_BLOCKING;
+	kernelShift();
+}
+
+
+//================================================
+//		kernelUnBlock	
+//================================================
+PUBLIC void kernelUnBlock(u32 pid)
+{
+	proc_table[pid].state = PROC_STATE_READY;
+	kernelShift();
+}
+
+
+
+PUBLIC int sysBlock()
+{
+	kernelBlock();
+}
+
+PUBLIC int sysUnBlock(u32 pid)
+{
+	kernelUnBlock(pid);
+}
+
 

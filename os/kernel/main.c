@@ -14,6 +14,7 @@ PUBLIC int kernel_main()
 	TASK*		p_task		= task_table;
 	PROCESS* 	p_proc		= proc_table;
 	char*		p_task_stack	= task_stack + STACK_SIZE_TOTAL;
+	char*		p_task_kernel_stack = task_kernel_stack + KERNEL_STACK_SIZE_TOTAL;
 	u16		selector_ldt	= SELECTOR_LDT_FIRST;
 	int i;
 
@@ -22,6 +23,7 @@ PUBLIC int kernel_main()
 		strcpy(p_proc->p_name, p_task->name);		//name of the process
 		p_proc->pid = i;				//pid
 		p_proc->ldt_sel = selector_ldt;
+		p_proc->state = PROC_STATE_READY;
 
 		//初始化进程表（PCB）中的LDT
 		//LDT中第一个描述符为GDT中的KERNEL_CS (DESC_FLAT_C)
@@ -44,8 +46,12 @@ PUBLIC int kernel_main()
 		p_proc->regs.eip = (u32)p_task->initial_eip;
 		p_proc->regs.esp = (u32)p_task_stack;
 		p_proc->regs.eflags = 0x1202;	//IF = 1, IOPL = 1; bit 2 is always 1.
+		p_proc->regs.task_kernel_stack = (u32)p_task_kernel_stack;
+		p_proc->regs.task_regs_backup = &(p_proc->regs_backup);
+
 
 		p_task_stack -= p_task->stacksize;
+		p_task_kernel_stack -= p_task->kernelStackSize;
 		p_proc++;				//指向下一个进程表
 		p_task++;				//指向下一个任务
 		selector_ldt += 1 << 3;			//在GDT增加一个LDT描述符
@@ -54,11 +60,13 @@ PUBLIC int kernel_main()
 	k_reenter = 0;
 	ticks = 0;
 
-	p_proc_ready	= proc_table;
-
-
+	p_proc_ready	= proc_table;			//p_proc_ready指向第一个PROCESS
+	
 	init_clock();
 	init_keyboard();
+//	init_hd();
+
+//	disp_int(p_proc_ready->regs.eip);
 
 
 	restart();					//跳转到准备好的进程中
@@ -66,6 +74,7 @@ PUBLIC int kernel_main()
 
 	while(1){}
 }
+
 PRIVATE void test_disp(int i)
 {
 	disp_int(i);
@@ -74,8 +83,13 @@ PRIVATE void test_disp(int i)
 
 void TestA()
 {	
-	int i = 0;
+//	block();
 	while(1){
+//	disp_str("A");
+//	disp_int(getTicks());
+//	disp_str(". ");
+//	milli_delay(1000);
+
 		//ComboKey kernelReadComboKey()使用示例
 		ComboKey ck = kernelReadComboKey();
 		bool* decorateKeyStatus[6] = {&(ck.ctrl_l_status), &(ck.ctrl_r_status), &(ck.alt_l_status), 
@@ -104,13 +118,16 @@ void TestA()
 
 void TestB()
 {
-	int i = 0x1000;
+	int i = 0;
 	while(1)
 	{
-		disp_str("B");
-		disp_int(getTicks());
-		disp_str(". ");
-		readKey();
-		milli_delay(1000);
+//		disp_str("B");
+//		disp_int(getTicks());
+//		disp_str(". ");
+//		milli_delay(1000);
+//		delay(1);
+//		i++;
+//		if(i == 3)
+//			unBlock(0);
 	}
 }

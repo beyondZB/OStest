@@ -7,17 +7,33 @@
 #include "global.h"
 
 
-#define NR_sysGetTicks	0
-#define NR_sysReadKey	1
+#define NR_SYS_GET_TICKS	0
+#define NR_SYS_READ_KEY		1
+#define NR_SYS_HD_IDENTIFY	2
+#define NR_SYS_BLOCK		3
+#define NR_SYS_UNBLOCK		4
 
-//================================================
-//		getTicks
-//================================================
 PUBLIC int getTicks()
 {
-	return system_call(NR_sysGetTicks, 0, 0, 0, 0, 0);
+	return system_call(NR_SYS_GET_TICKS, 0, 0, 0, 0, 0);
 }
 
 PUBLIC VirtualKey readKey(){
-	return (VirtualKey)( system_call(NR_sysReadKey, 0, 0, 0, 0, 0) );
+	return (VirtualKey)( system_call(NR_SYS_READ_KEY, 0, 0, 0, 0, 0) );
+}
+
+PUBLIC void HdIdentify(int drive)
+{
+	disp_str("HdIdentify!!!");
+	system_call(NR_SYS_HD_IDENTIFY, drive, 0, 0, 0, 0);
+}
+
+PUBLIC void block()
+{
+	system_call(NR_SYS_BLOCK, 0, 0, 0, 0, 0);
+}
+
+PUBLIC void unBlock(u32 pid)
+{
+	system_call(NR_SYS_UNBLOCK, pid, 0, 0, 0, 0);
 }
