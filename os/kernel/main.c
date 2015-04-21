@@ -64,7 +64,7 @@ PUBLIC int kernel_main()
 	
 	init_clock();
 	init_keyboard();
-//	init_hd();
+	init_hd();
 
 //	disp_int(p_proc_ready->regs.eip);
 
@@ -81,14 +81,27 @@ PRIVATE void test_disp(int i)
 	disp_str(" ");
 }
 
+void idle()
+{
+	while(1){
+		disp_str("idle. ");
+		milli_delay(1000);
+	}
+}
+
 void TestA()
 {	
-//	block();
+	block();
+	disp_str("(void*)TestA: ");
+	disp_int((void*) TestA);
+	disp_str("\n");
+	hdIdentify(0);
 	while(1){
-//	disp_str("A");
-//	disp_int(getTicks());
-//	disp_str(". ");
-//	milli_delay(1000);
+	disp_str("A");
+	disp_int(getTicks());
+	disp_str(". ");
+	milli_delay(1000);
+//	delay(1);
 
 		//ComboKey kernelReadComboKey()使用示例
 		ComboKey ck = kernelReadComboKey();
@@ -121,13 +134,13 @@ void TestB()
 	int i = 0;
 	while(1)
 	{
-//		disp_str("B");
-//		disp_int(getTicks());
-//		disp_str(". ");
-//		milli_delay(1000);
+		disp_str("B");
+		disp_int(getTicks());
+		disp_str(". ");
+		milli_delay(1000);
 //		delay(1);
-//		i++;
-//		if(i == 3)
-//			unBlock(0);
+		i++;
+		if(i == 3)
+			unBlock(1);
 	}
 }

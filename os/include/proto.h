@@ -22,6 +22,7 @@ void save();
 void kernelShift();		//立即切换进程
 
 /* main.c */
+void idle();
 void TestA();
 void TestB();
 

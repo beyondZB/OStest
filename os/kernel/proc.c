@@ -42,7 +42,7 @@ PUBLIC void kernelBlock()
 PUBLIC void kernelUnBlock(u32 pid)
 {
 	proc_table[pid].state = PROC_STATE_READY;
-	kernelShift();
+//	disp_str("unblocked@@\n");
 }
 
 

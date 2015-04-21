@@ -36,9 +36,9 @@ PUBLIC void kernelSchedule()
 
 PUBLIC void milli_delay(int milli_sec)
 {
-	int t = system_call(0, 0, 0, 0, 0, 0);
+	int t = kernelGetTicks();
 
-	while(((system_call(0, 0, 0, 0, 0, 0) - t) * 1000 / HZ) < milli_sec) {}
+	while(((kernelGetTicks() - t) * 1000 / HZ) < milli_sec) {}
 }
 
 PUBLIC void init_clock()

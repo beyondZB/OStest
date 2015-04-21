@@ -22,9 +22,9 @@ PUBLIC VirtualKey readKey(){
 	return (VirtualKey)( system_call(NR_SYS_READ_KEY, 0, 0, 0, 0, 0) );
 }
 
-PUBLIC void HdIdentify(int drive)
+PUBLIC void hdIdentify(int drive)
 {
-	disp_str("HdIdentify!!!");
+//	disp_str("HdIdentify!!!");
 	system_call(NR_SYS_HD_IDENTIFY, drive, 0, 0, 0, 0);
 }
 

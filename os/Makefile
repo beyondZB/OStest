@@ -48,22 +48,22 @@ disasm:
 	$(DASM) $(DASMFLAGS) $(KERNEL) > $(DASMOUTPUT)
 
 buildImg:
-	dd if=/dev/zero of=b.img bs=1024 count=1440
-	lofsutil-0.0.1 -c b.img
-	lofsutil-0.0.1 -f b.img
+	dd if=/dev/zero of=floppy.img bs=1024 count=1440
+	lofsutil-0.0.1 -c floppy.img
+	lofsutil-0.0.1 -f floppy.img
 
 writeImg:
 	cp boot/mbr ./
-	lofsutil-0.0.1 -b mbr b.img
+	lofsutil-0.0.1 -b mbr floppy.img
 	rm mbr
 	cp boot/findLoader ./
-	lofsutil-0.0.1 -e findLoader b.img
+	lofsutil-0.0.1 -e findLoader floppy.img
 	rm findLoader
 	cp boot/LOADER.BIN ./
-	lofsutil-0.0.1 -p LOADER.BIN b.img
+	lofsutil-0.0.1 -p LOADER.BIN floppy.img
 	rm LOADER.BIN
 	cp kernel/KERNEL.BIN ./
-	lofsutil-0.0.1 -p KERNEL.BIN b.img
+	lofsutil-0.0.1 -p KERNEL.BIN floppy.img
 	rm KERNEL.BIN
 
 boot/mbr: boot/mbr.asm boot/include/load.inc boot/include/lofs.inc
