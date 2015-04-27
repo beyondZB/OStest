@@ -23,3 +23,7 @@ extern	char		task_stack[];
 extern	char		task_kernel_stack[];
 extern	TASK		task_table[];
 extern	irq_handler	irq_table[];
+
+EXTERN	int		readKeyBlockEip;
+EXTERN	int		hdIdentifyBlockEip;
+EXTERN	int		hdGetPartTableBlockEip;

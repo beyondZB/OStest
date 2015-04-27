@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "global.h"
 #include "keyboard.h"
+#include "hd.h"
 
 PUBLIC int kernel_main()
 {
@@ -45,9 +46,9 @@ PUBLIC int kernel_main()
 	
 		p_proc->regs.eip = (u32)p_task->initial_eip;
 		p_proc->regs.esp = (u32)p_task_stack;
-		p_proc->regs.eflags = 0x1202;	//IF = 1, IOPL = 1; bit 2 is always 1.
+		p_proc->regs.eflags = 0x3202;	//IF = 1, IOPL = 3; bit 2 is always 1.
 		p_proc->regs.task_kernel_stack = (u32)p_task_kernel_stack;
-		p_proc->regs.task_regs_backup = &(p_proc->regs_backup);
+		p_proc->regs.task_regs_backup = (u32)&(p_proc->regs_backup);
 
 
 		p_task_stack -= p_task->stacksize;
@@ -91,11 +92,31 @@ void idle()
 
 void TestA()
 {	
-	block();
-	disp_str("(void*)TestA: ");
-	disp_int((void*) TestA);
-	disp_str("\n");
-	hdIdentify(0);
+//	disp_str("(void*)TestA: ");
+//	disp_int((void*) TestA);
+//	disp_str("\n");
+	hdOpen(0);
+//	block();
+//	struct part_info pti;
+//	hdIoctl(1, DIOCTL_GET_GEO, &pti);
+//	disp_str("device1 base: ");
+//	disp_int(pti.base);
+//	disp_str("\n");
+//	disp_str("device1 size: ");
+//	disp_int(pti.size);
+//	disp_str("\n");
+
+
+//	char r[6] = "66666";
+//	hdRead(0, 0x0, 6, r);
+//	disp_str("readed\n");
+//	disp_str(r);
+//	disp_str("\n");
+	
+	char* w = "12345";
+	hdWrite(0, 0x0, 6, w);
+	disp_str("writed\n");
+	
 	while(1){
 	disp_str("A");
 	disp_int(getTicks());
@@ -103,27 +124,27 @@ void TestA()
 	milli_delay(1000);
 //	delay(1);
 
-		//ComboKey kernelReadComboKey()使用示例
-		ComboKey ck = kernelReadComboKey();
-		bool* decorateKeyStatus[6] = {&(ck.ctrl_l_status), &(ck.ctrl_r_status), &(ck.alt_l_status), 
-						&(ck.alt_r_status), &(ck.shift_l_status), &(ck.shift_r_status)};
-		char* decorateOutput[6] = {"ctrlL ", "ctrlR ", "altL ", "altR ", "siftL ", "shiftR "};
-
-		int i = 0;
-		for(i = 0; i < 6; i++){
-			if(*(decorateKeyStatus[i]) == VKEY_STATE_PRESSED){
-				disp_str(decorateOutput[i]);
-			}
-		}
-		
-		char out[3] = {' ', ' ', '\0'};
-		out[0] = ck.key;
-		disp_str(out);
+		//ComboKey kernelReadComboKey()使用示例; 现在已经不能在用户进程中调用kernelReadComboKey()了,其中增加了kernelBlock(),它包含特权指令
+//		ComboKey ck = kernelReadComboKey();
+//		bool* decorateKeyStatus[6] = {&(ck.ctrl_l_status), &(ck.ctrl_r_status), &(ck.alt_l_status), 
+//						&(ck.alt_r_status), &(ck.shift_l_status), &(ck.shift_r_status)};
+//		char* decorateOutput[6] = {"ctrlL ", "ctrlR ", "altL ", "altR ", "siftL ", "shiftR "};
+//
+//		int i = 0;
+//		for(i = 0; i < 6; i++){
+//			if(*(decorateKeyStatus[i]) == VKEY_STATE_PRESSED){
+//				disp_str(decorateOutput[i]);
+//			}
+//		}
+//		
+//		char out[3] = {' ', ' ', '\0'};
+//		out[0] = ck.key;
+//		disp_str(out);
 
 		//系统调用VirtualKey readKey()使用实例
-//		char out[3] = {' ', ' ', '\0'};
-//		out[0] = readKey();
-//		disp_str(out);
+//		char out1[3] = {' ', ' ', '\0'};
+//		out1[0] = readKey();
+//		disp_str(out1);
 //
 //		milli_delay(10);
 	}
@@ -139,8 +160,8 @@ void TestB()
 		disp_str(". ");
 		milli_delay(1000);
 //		delay(1);
-		i++;
-		if(i == 3)
-			unBlock(1);
+//		i++;
+//		if(i == 3)
+//			unBlock(1);
 	}
 }

@@ -127,7 +127,7 @@ PUBLIC void keyboard_handler(int irq)
 		}
 	}
 
-
+	kernelUnBlock(readKeyBlockEip);
 //	u8 scan_code = in_byte(KB_DATA);
 //
 //	if (kb_in.count < KB_IN_BYTES) {
@@ -166,7 +166,8 @@ PUBLIC VirtualKey kernelReadKey()       /* 从vk缓冲区中读取下一个字�
         VirtualKey key;
 
         while (vk.count <= 0){
-		milli_delay(10);
+		readKeyBlockEip = (p_proc_running - proc_table);
+		kernelBlock();
 	}
 
         key = *(vk.p_tail);

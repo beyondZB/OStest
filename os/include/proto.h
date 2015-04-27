@@ -62,9 +62,25 @@ PUBLIC int getTicks();
 PUBLIC VirtualKey readKey();
 PUBLIC void block();
 PUBLIC void unBlock(u32 pid);
+PUBLIC void hdClose(u32 device);
+PUBLIC void hdRead(u32 device, u64 position, u32 count, char* buf);
+PUBLIC void hdWrite(u32 device, u64 position, u32 count, char* buf);
+PUBLIC void hdIoctl(u32 device, u32 request, char* buf);
+
+
+
+
 
 /* hd.c */
 PUBLIC void init_hd();
 PUBLIC void kernelHdIdentify(int drive);
-PUBLIC int sysHdIdentify(int drive);
+PUBLIC int sysHdOpen(int drive);
+PUBLIC int sysHdClose(u32 device);
+PUBLIC void kernelHdClose(u32 device);
+PUBLIC int sysHdRead(u32 device, u64 position, u32 count, char* buf);
+PUBLIC void kernelHdRead(u32 device, u64 position, u32 count, char* buf);
+PUBLIC int sysHdIoctl(u32 device, u32 request, char* buf);
+PUBLIC void kernelHdIoctl(u32 device, u32 request, char* buf);
+PUBLIC int sysHdWrite(u32 device, u64 position, u32 count, char* buf);
+PUBLIC void kernelHdWrite(u32 device, u64 position, u32 count, char* buf);
 

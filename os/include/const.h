@@ -51,8 +51,16 @@
 #define	PRINTER_IRQ	7
 #define	AT_WINI_IRQ	14	/* at winchester */
 
+/* tasks */
+/* 注意 TASK_XXX 的定义要与 global.c 中对应 */
+#define INVALID_DRIVER	-20
+#define INTERRUPT	-10
+#define TASK_TTY	0
+#define TASK_SYS	1
+#define TASK_HD		2
+
 /* system call */
-#define NR_SYS_CALL	5
+#define NR_SYS_CALL	9
 
 
 #define		TRUE	1
@@ -69,9 +77,50 @@
 					Read : Read Status Register
 					Write: Write Input Buffer(8042 Command) */
 
+
+#define	DIOCTL_GET_GEO	1
+
 /* Hard Drive */
 #define SECTOR_SIZE		512
 #define SECTOR_BITS		(SECTOR_SIZE * 8)
 #define SECTOR_SIZE_SHIFT	9
+
+#define MAX_DRIVES		2
+#define NR_PART_PER_DRIVE	4
+#define NR_SUB_PER_PART		16
+#define NR_SUB_PER_DRIVE	(NR_SUB_PER_PART * NR_PART_PER_DRIVE)
+#define NR_PRIM_PER_DRIVE	(NR_PART_PER_DRIVE + 1)
+
+#define MAX_PRIM		(MAX_DRIVES * NR_PRIM_PER_DRIVE - 1)
+#define MAX_WUBPARTITIONS	(NR_SUB_PER_DRIVE * MAX_DRIVES)
+
+/* device numbers of hard disk */
+#define	MINOR_hd1a		0x10
+#define	MINOR_hd2a		(MINOR_hd1a+NR_SUB_PER_PART)
+
+#define	ROOT_DEV		MAKE_DEV(DEV_HD, MINOR_BOOT)
+
+#define	P_PRIMARY	0
+#define	P_EXTENDED	1
+
+#define LESSOS_PART	0x99	/* LESSOS partition */
+#define NO_PART		0x00	/* unused entry */
+#define EXT_PART	0x05	/* extended partition */
+
+/* major device numbers (corresponding to kernel/global.c::dd_map[]) */
+#define	NO_DEV			0
+#define	DEV_FLOPPY		1
+#define	DEV_CDROM		2
+#define	DEV_HD			3
+#define	DEV_CHAR_TTY		4
+#define	DEV_SCSI		5
+
+/* make device number from major and minor numbers */
+#define	MAJOR_SHIFT		8
+#define	MAKE_DEV(a,b)		((a << MAJOR_SHIFT) | b)
+
+/* separate major and minor numbers from device number */
+#define	MAJOR(x)		((x >> MAJOR_SHIFT) & 0xFF)
+#define	MINOR(x)		(x & 0xFF)
 
 #endif /*CONST_H*/

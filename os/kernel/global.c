@@ -18,9 +18,25 @@ PUBLIC	TASK	task_table[NR_TASKS] = {{idle, STACK_SIZE_IDLE, KERNEL_STACK_SIZE_ID
 
 PUBLIC	irq_handler	irq_table[NR_IRQ];
 
+
+
+/*
+#define NR_SYS_GET_TICKS	0
+#define NR_SYS_READ_KEY		1
+#define NR_SYS_HD_OPEN		2
+#define NR_SYS_BLOCK		3
+#define NR_SYS_UNBLOCK		4
+#define NR_SYS_HD_CLOSE		5
+#define NR_SYS_HD_READ		6
+#define NR_SYS_HD_WRITE		7
+#define NR_SYS_HD_IOCTL		8
+*/
 PUBLIC	system_call_handler	sys_call_table[NR_SYS_CALL] = { sysGetTicks,
 								sysReadKey, 
-								sysHdIdentify,
+								sysHdOpen,
 								sysBlock,
-								sysUnBlock};
-
+								sysUnBlock,
+								sysHdClose,
+								sysHdRead,
+								sysHdWrite,
+								sysHdIoctl};
