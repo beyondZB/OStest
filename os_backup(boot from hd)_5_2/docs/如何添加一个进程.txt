@@ -1,0 +1,4 @@
+1.在main.c添加一个进程体(函数)
+2.在proc.h中添加相应的宏
+3.在global.c中的task_table中添加一项进程
+4.在proto.h中添加进程体的函数声明

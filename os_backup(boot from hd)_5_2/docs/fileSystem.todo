@@ -1,0 +1,14 @@
+int<fd> open(const char* pathname, int function)
+int<size> write(int fd, const char* buf, int count)
+int<size> read(int fs, const char* buf, int count)
+int close(int fd)
+
+
+struct file_descriptor{
+	int fd_mode;
+	int fd_position;
+	struct inode* inode;
+};
+全局有一个struct file_descriptor fileDescriptor [NR_FD];
+		
+pcb里面加一个数组,struct file_descriptor* p_fd[NR];指向fileDescriptor的元素

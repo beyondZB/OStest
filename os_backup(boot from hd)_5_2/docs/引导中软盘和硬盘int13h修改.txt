@@ -1,0 +1,50 @@
+一.int 13h中很多功能都要用dl传递驱动器号，软盘驱动器号为：0h-7Fh；硬盘驱动器号为：80h-0FFh
+
+二.mbr.asm中的ReadSector函数需要修改，对于硬盘驱动，传统的ah=02h功能，已经不够用了（好像对于＜84G的硬盘还可以用），而且算CHS太麻烦
+	可以使用int 13h拓展功能：ah=42h读， 43h写
+	下面是拓展int 13h功能的介绍：
+		1.数据结构（Data Structure)
+		该数据结构是提供给扩展INT 13H使用的，它是建立在逻辑扇号之上的，具体结构如下：
+		
+		disk_addr_pkt struc ; 磁盘地址包
+		packet_size  db  16  ; 磁盘参数包的尺寸，必须为10H
+		reserved    db  0  ;   保留，必须为零
+		block_count  dw  ?  ;   传输的扇区数
+		buffer_addr  dd  ?  ;   内存缓冲区地址（段：偏移）
+		block_num    dq  ?  ;   起始绝对扇区号（即起始扇区的LBA号码）
+		disk_addr_pkt ends
+		
+		   结构中前两项是固定的，用到的是后三项。起始绝对扇区号即前面讲到的逻辑扇区号，从0开始编号。
+		
+		2．扩展读的功能
+		  入口:AH＝42H
+		     DL＝驱动器号（硬盘是80H）
+		     DS:SI＝磁盘地址包（即前面的数据结构的地址）
+		  出口:成功则 CF＝0, AH＝0
+		     失败则 CF＝1, AH＝错误码
+		3．扩展写的功能
+		  入口:AH＝43H
+		     AL ＝0 (不校验)
+		       ＝1（校验）
+		     DL＝驱动器号
+		     DS：SI＝磁盘地址包
+		  出口:成功则 CF＝0, AH＝0
+		     失败则 CF＝1, AH＝错误码
+		   注：一般取AL＝0。
+		4．获得驱动器参数
+		  入口:AH＝48H
+		     DL＝驱动器号
+		     DS：SI＝返回结果的地址
+		  出口:成功则 CF＝0, AH＝0
+		     DS：SI指向返回数据结构的地址：
+		
+		Info_size    dw  26 ；缓冲区的大小
+		Flags      dw  ？ ；信息标志
+		Cylinders    dd  ?  ；number of cylinders on disk
+		Heads      dd  ?  ；number of heads on disk
+		Sec_per_track dd  ?  ；number of sectors per track
+		Sectors     dq  ?  ；number of sectors on requested disk
+		Sector_size  dw  ?  ；number of bytes per sector
+		
+		失败则 CF＝1, AH＝错误码
+		错误码的定义与原来的相同，增加的几个在此用不到。

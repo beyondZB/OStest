@@ -7,6 +7,7 @@
 
 EXTERN	int		disp_pos;
 EXTERN	int		k_reenter;
+
 EXTERN	u8		gdt_ptr[6];	/* 0~15:Limit 16~47:Base */
 EXTERN	DESCRIPTOR	gdt[GDT_SIZE];
 EXTERN	u8		idt_ptr[6];	/* 0~15:Limit 16~47:Base */

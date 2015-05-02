@@ -1,0 +1,89 @@
+在PROCESS中添加一个p_flags表示是否就绪
+声明一个PREOCESS* current_process,这样才能之道正在运行的程序的信息
+
+写一个阻塞队列list
+写kernelBlock(list* li)
+	将current_process->p_flags设置为false
+	将current_process->pid入队
+写kernelUnBlock(list* li)
+	取出队首的pid
+	将proc_table[pid].p_flags设置为true
+
+为了防止
+进程A在等待中断的时候阻塞了，在这之前进程B想要访问驱动被阻塞了，如果按先进先出那么，在中断来的时候，b进入驱动
+这种情况
+在系统调用中写一个这样的结构
+while(hd_driver_busy());
+检查到硬盘驱动可以使用了,再进入
+
+
+在时钟中断切换进程的时候判断p_flags
+
+//修正==============================================================================================================
+对于第一点，PROCESS里面最好加一个state字段，目前有PROC_STATE_RUNNING，PROC_STATE_READY，PROC_STATE_BLOCKING三种状态
+
+
+对于阻塞队列，kernelBlock是无参函数，仅仅将自己阻塞
+kernelUnblock接受一个PID参数，用于接触特定PID的阻塞
+
+当进程发现硬盘驱动被别的进程使用时
+  waitInList(list, current_process)
+  kernelBlock()
+每个进程完成硬盘使用时
+  pid = dequeue(list)
+  kernelUnblock(pid)
+
+当驱动发出硬盘命令时，需要等待硬盘完成
+  currentWaitingHardDisk = current_process
+  kernelBlock()
+当硬盘中断触发，激活等待进程
+ kernelUnblock(currentWaitingHardDisk)
+ currentWaitingHardDisk = INVALID_PID
+
+
+关键在于硬盘驱动中有一个标识
+isBusy
+当进程使用硬盘驱动时将其设置为True，结束使用时设置为False
+
+
+因此，进程要使用硬盘驱动时，检查isBusy
+当进程发现硬盘驱动被别的进程使用时
+  waitInList(list, current_process)
+  kernelBlock()
+每个进程完成硬盘使用时
+  pid = dequeue(list)
+  kernelUnblock(pid)
+
+
+
+所以
+
+10-金柳颀 2015-4-15 20:17:36
+你先不要管驱动的竞争使用
+
+10-金柳颀 2015-4-15 20:17:40
+先把单进程使用写好
+
+10-金柳颀 2015-4-15 20:17:46
+我再跟你说怎么处理竞争问题
+
+
+
+恩 队列用链表还是数组？
+
+10-金柳颀 2015-4-15 20:20:11
+先用数组~
+
+10-金柳颀 2015-4-15 20:20:23
+你现在先不用写这个队列~
+
+10-金柳颀 2015-4-15 20:20:45
+先把带阻塞的调度，block，unblock和硬盘驱动写完
+
+10-金柳颀 2015-4-15 20:20:54
+然后再来处理竞争问题
+
+
+
+===========================================================================================
+

@@ -1,0 +1,45 @@
+DONE
+把当前进程的进程表写好(保留现场)
+schedule找下个进程
+就绪进程的进程表已经准备好的,所以不用管进程表的事,直接调用restart切换进程
+
+kernelBlock:
+  push eax
+  mov eax,[esp + 4] // Get return address
+  mov [dest],eax // Save return address
+  pop eax
+  add esp, 4
+
+  // Save all other information
+
+  call schedule
+  call restart
+
+
+
+
+
+
+
+
+pushad行为:下面是部分的进程表,主要看esp, esp为pushad之前的值
+<bochs:72> print-stack
+Stack address size 4
+ | STACK 0x00044ca0 [0x0000001b]//gs
+ | STACK 0x00044ca4 [0x0000000f]//fs
+ | STACK 0x00044ca8 [0x0000000f]//es
+ | STACK 0x00044cac [0x0000000f]//ds
+ | STACK 0x00044cb0 [0x00000000]//edi
+ | STACK 0x00044cb4 [0x00000000]//esi
+ | STACK 0x00044cb8 [0x00043f2c]//ebp
+ | STACK 0x00044cbc [0x00044cd0]//esp!!!
+ | STACK 0x00044cc0 [0x00000000]//ebx
+ | STACK 0x00044cc4 [0x00000000]//edx
+ | STACK 0x00044cc8 [0x00000000]//ecx
+ | STACK 0x00044ccc [0x00044ca0]//eax
+ | STACK 0x00044cd0 [0x000307d4]//retaddr!!
+ | STACK 0x00044cd4 [0x000318dc]//eip
+ | STACK 0x00044cd8 [0x00000007]//cs
+ | STACK 0x00044cdc [0x00001202]//eflags
+........
+

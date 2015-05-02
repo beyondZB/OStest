@@ -30,6 +30,10 @@ OBJS 		= kernel/kernel.o kernel/start.o lib/kliba.o lib/klib.o lib/string.o\
 		  kernel/clock.o kernel/proc.o kernel/syscall.o kernel/keyboard.o kernel/api.o kernel/hd.o
 DASMOUTPUT	= kernel.bin.asm
 
+#img name
+FLOPPY		= floppy.img
+HD		= /dev/sdb
+
 .PHONY: everything final image clean realclean  all buildImg
 
 everything: $(BOOT) $(KERNEL) image
@@ -48,22 +52,24 @@ disasm:
 	$(DASM) $(DASMFLAGS) $(KERNEL) > $(DASMOUTPUT)
 
 buildImg:
-	dd if=/dev/zero of=floppy.img bs=1024 count=1440
-	lofsutil-0.0.1 -c floppy.img
-	lofsutil-0.0.1 -f floppy.img
+	dd if=/dev/zero of=$(HD) bs=1024 count=1440
+	lofsutil-0.0.1 -c $(HD)
+	lofsutil-0.0.1 -f $(HD)
 
 writeImg:
+	lofsutil-0.0.1 -c $(HD)
+	lofsutil-0.0.1 -f $(HD)
 	cp boot/mbr ./
-	lofsutil-0.0.1 -b mbr floppy.img
+	lofsutil-0.0.1 -b mbr $(HD)
 	rm mbr
 	cp boot/findLoader ./
-	lofsutil-0.0.1 -e findLoader floppy.img
+	lofsutil-0.0.1 -e findLoader $(HD)
 	rm findLoader
 	cp boot/LOADER.BIN ./
-	lofsutil-0.0.1 -p LOADER.BIN floppy.img
+	lofsutil-0.0.1 -p LOADER.BIN $(HD)
 	rm LOADER.BIN
 	cp kernel/KERNEL.BIN ./
-	lofsutil-0.0.1 -p KERNEL.BIN floppy.img
+	lofsutil-0.0.1 -p KERNEL.BIN $(HD)
 	rm KERNEL.BIN
 
 boot/mbr: boot/mbr.asm boot/include/load.inc boot/include/lofs.inc

@@ -1,0 +1,13 @@
+键盘扫描码为下标对应的表在./include/keymap.h
+键盘中断和系统调用处理函数sysReadkey在./kernel/keyboard.c    头文件在./include/keyboard.h
+用户的系统调用接口在./kernel/api.c
+写了一个readKey()的系统调用
+readkey()还有kernelReadComboKey()的示例代码在./kernel/main.c的TestA()中(TestA是一个进程).
+
+kernelFun()	内核模块间接口
+sysFun()	系统调用的内核版本
+fun()		系统调用的用户版本
+
+./todo.txt里说了两个中断中未处理的按键pause, prntscr
+测试的时候想要一开始清屏,就在./kernel/keyboard.c      init_keyboard()中把清屏代码注释符去掉
+

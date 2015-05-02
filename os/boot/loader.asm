@@ -73,7 +73,7 @@ LABEL_START:
 .MemEnough:
 ;在A盘根目录找KERNEL.BIN
 	xor	ah, ah	; ┓
-	xor	dl, dl	; ┣ 软驱复位
+	xor	dl, 80h	; ┣ 硬盘复位
 	int	13h	; ┛
 
 
@@ -111,9 +111,9 @@ LABEL_SEARCH_IN_ROOT_DIR_BEGIN:
 	cld
 	mov	dx, 32
 LABEL_SEARCH_FOR_KERNELBIN:
-	cmp	dx, 0						; ┓循环次数控制,
+	cmp	dx, 0					; ┓循环次数控制,
 	jz	LABEL_GOTO_NEXT_SECTOR_IN_ROOT_DIR	; ┣如果已经读完了一个 Sector,
-	dec	dx						; ┛就跳到下一个 Sector
+	dec	dx					; ┛就跳到下一个 Sector
 	mov	cx, 11
 LABEL_CMP_FILENAME:
 	cmp	cx, 0
@@ -590,51 +590,100 @@ DispStrRealMode:
 ; 作用:
 ;	从第 ax 个 Sector 开始, 将 cl 个 Sector 读入 es:bx 中
 ReadSector:
-	; -----------------------------------------------------------------------
-	; 怎样由扇区号求扇区在磁盘中的位置 (扇区号 -> 柱面号, 起始扇区, 磁头号)
-	; -----------------------------------------------------------------------
-	; 设扇区号为 x
-	;                           ┌ 柱面号 = y >> 1
-	;       x           ┌ 商 y ┤
-	; -------------- => ┤      └ 磁头号 = y & 1
-	;  每磁道扇区数     │
-	;                   └ 余 z => 起始扇区号 = z + 1
 	push	ax
 	push	bx
 	push	cx
 	push	dx
-	push	bp
+	push	si
 
-	mov	bp, sp
-	sub	esp, 2			; 辟出两个字节的堆栈区域保存要读的扇区数: byte [bp-2]
-
-	mov	byte [bp-2], cl
-	push	bx			; 保存 bx
-	mov	bl, SecPerTrk		; bl: 除数
-	div	bl			; y 在 al 中, z 在 ah 中
-	inc	ah			; z ++
-	mov	cl, ah			; cl <- 起始扇区号
-	mov	dh, al			; dh <- y
-	shr	al, 1			; y >> 1 (其实是 y/BPB_NumHeads, 这里BPB_NumHeads=2)
-	mov	ch, al			; ch <- 柱面号
-	and	dh, 1			; dh & 1 = 磁头号
-	pop	bx			; 恢复 bx
-	; 至此, "柱面号, 起始扇区, 磁头号" 全部得到 ^^^^^^^^^^^^^^^^^^^^^^^^
-	mov	dl, 0			; 驱动器号 (0 表示 A 盘)
-.GoOnReading:
-	mov	ah, 2			; 读
-	mov	al, byte [bp-2]		; 读 al 个扇区
+	mov	byte [PacketSize], 	10h
+	mov	byte [Reserved], 	0
+	mov	byte [BlockCount], 	cl
+	mov	byte [BlockCount + 1], 	0
+	mov	word [BufferOff], 	bx
+	mov	word [BufferSeg], 	es
+	mov	word [BlockNum], 	ax
+	mov	word [BlockNum + 2],	0
+	mov	dword [BlockNum + 4], 	0
+READFAIL:
+	mov	ah, 42h			;功能号42h读，43h写
+	mov	al, 0			;写操作时有效：0为无校验写，1为有校验写
+	mov	dl, 80h			;驱动号
+	;数据包的段地址为ds
+	mov	si, DiskAddressPacket
 	int	13h
-	jc	.GoOnReading		; 如果读取错误 CF 会被置为 1, 这时就不停地读, 直到正确为止
+	;ah==0,cf==0表示成功,若失败ah为错误码,cf==1
+	jnc	READSUCC
 
-	add	esp, 2
-	pop	bp
+	push	ax
+	push	bx
+	push	cx
+	mov	ah, 0Eh		
+	mov	al, '#'		
+	mov	bl, 0Fh		
+	int	10h		
+	pop 	cx
+	pop 	bx
+	pop 	ax
+
+	mov	dl, ah
+	call	DispDecmo
+
+	jmp	READFAIL		;没有成功，就反复读，直到成功
+READSUCC:
+	pop	si
 	pop	dx
 	pop	cx
 	pop	bx
 	pop	ax
 	ret
 
+;----------------------------------------------------------------------------
+; 函数名: DispDecmo
+;----------------------------------------------------------------------------
+; 作用:
+;	显示十进制整数, dl中存放要输出的数字
+DispDecmo:
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	mov	al, dl
+	mov	cx, 3
+loop1:
+	mov	ah, 0
+	mov	dl, 10
+	div	dl
+	add	ah, 48
+	mov	bl, ah
+	mov	bh, 0
+	push	bx
+	loop	loop1
+
+	mov	cx, 3
+loop2:
+	pop	ax
+	mov	ah, 0eh
+	int	10h
+	loop	loop2
+	
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	ret
+
+
+;===========================================================================
+DiskAddressPacket:
+	PacketSize	db	10h
+	Reserved	db	0
+	BlockCount	dw	0
+	BufferOff	dw	0
+	BufferSeg	dw	0
+	BlockNum	dq	0
+;===========================================================================
 
 ; 从此以后的代码在保护模式下执行 ----------------------------------------------------
 ; 32 位代码段. 由实模式跳入 ---------------------------------------------------------
@@ -663,6 +712,7 @@ LABEL_PM_START:
 	call	SetupPaging
 
 	call	InitKernel
+
 
 	;***************************************************************
 	jmp	SelectorFlatC:KernelEntryPointPhyAddr			  ; 正式进入内核 *
