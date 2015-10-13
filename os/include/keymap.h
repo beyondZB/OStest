@@ -3,8 +3,8 @@
 /*    It should be and can only be included by keyboard.c!          */
 /********************************************************************/
 
-#ifndef	KEYMAP_H
-#define	KEYMAP_H
+#ifndef	_KEYMAP_H
+#define	_KEYMAP_H
 
 
 /* Keymap for US MF-2 keyboard. */
@@ -292,5 +292,5 @@ WWW Favorites	E0, 66		E0, E6
 
 
 
-#endif /* KEYMAP_H */
+#endif /* _KEYMAP_H */
 

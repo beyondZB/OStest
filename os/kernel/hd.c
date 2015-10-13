@@ -1,5 +1,3 @@
-#include "type.h"
-#include "const.h"
 #include "protect.h"
 #include "string.h"
 #include "proc.h"
@@ -18,7 +16,7 @@ PRIVATE struct hd_info	hd_info[1];
 PUBLIC void init_hd();
 PUBLIC int sysHdOpen(int drive);
 PUBLIC void kernelHdIdentify(int drive);
-PRIVATE void print_identify_info(u16* hdinfo);
+PRIVATE void analysis_identify_info(u16* hdinfo);
 PRIVATE void hd_cmd_out(struct hd_cmd* cmd);
 PRIVATE int waitfor(int mask, int val, int timeout);
 PUBLIC void hd_handler(int irq);
@@ -53,7 +51,7 @@ PUBLIC void init_hd()
 }
 
 
-PUBLIC void kernelHdOpen(int device)
+PUBLIC struct hd_info* kernelHdOpen(int device)
 {
 	int drive = DRV_OF_DEV(device);
 	if(drive != 0)
@@ -61,12 +59,15 @@ PUBLIC void kernelHdOpen(int device)
 		disp_str("hd open error\n");
 	}
 
-//	kernelHdIdentify(drive);
+	kernelHdIdentify(drive);
 
 	if(hd_info[drive].open_cnt++ == 0){
 		partition(drive * (NR_PART_PER_DRIVE + 1), P_PRIMARY);
-		print_hdinfo(&hd_info[drive]);
+		//输出硬盘分区情况
+		//print_hdinfo(&hd_info[drive]);
 	}
+
+	return &(hd_info[0]);
 }
 
 PUBLIC int sysHdClose(u32 device)
@@ -117,21 +118,19 @@ PUBLIC void kernelHdRead(u32 device, u64 position, u32 count, char* buf)
 	cmd.device = MAKE_DEVICE_REG(1, drive, (sect_nr >> 24) & 0xF);
 	cmd.command = ATA_READ;
 	hd_cmd_out(&cmd);
-	disp_str("read\n");
 	int bytes_left = count;
 	disp_int(count);
+	char** pbuf = &buf;
 	while(bytes_left > 0){
 		int bytes = (SECTOR_SIZE <  bytes_left) ? SECTOR_SIZE : bytes_left;
 
 		hdIdentifyBlockEip = p_proc_running - proc_table;
 		kernelBlock();
 
-		port_read(REG_DATA, buf, SECTOR_SIZE);
-		disp_str("read after block\n");
-		disp_int((void* )kernelHdRead);
+		port_read(REG_DATA, *pbuf, SECTOR_SIZE);
 
 		bytes_left -= bytes;
-		buf += bytes;
+		*pbuf += bytes;
 	}
 }
 
@@ -409,8 +408,7 @@ PRIVATE void print_hdinfo(struct hd_info* hdi)
 PUBLIC int sysHdOpen(int device)
 {
 //	disp_str("sysHdOpen@@@@\n");
-	kernelHdOpen(device);
-	return 0;
+	return (int)kernelHdOpen(device);
 }
 
 /* @param drive  When drive == 0, master is selected
@@ -425,14 +423,12 @@ PUBLIC void kernelHdIdentify(int drive)
 	kernelBlock();
 	port_read(REG_DATA, hdbuf, SECTOR_SIZE);
 
-	print_identify_info((u16*)hdbuf);
+	analysis_identify_info((u16*)hdbuf);
 }
 
-
-PRIVATE void print_identify_info(u16* hdinfo)
+PRIVATE void analysis_identify_info(u16* hdinfo)
 {
 	disp_str("print hd info: \n");
-	disp_int((void*) print_identify_info);
 	int i, k;
 	char s[64];
 
@@ -458,24 +454,27 @@ PRIVATE void print_identify_info(u16* hdinfo)
 	}
 
 	int capabilities = hdinfo[49];
+	hd_info[0].lba_support = (capabilities & 0x0200);
 	//printf("LBA48 supported: %s\n", 
 	//	(capabilities & 0x0200) ? "YES" : "NO");
-	disp_str("LBA supported: ");
-	disp_str((capabilities & 0x0200) ? "YES" : "NO");
-	disp_str("\n");
+//	disp_str("LBA supported: ");
+//	disp_str((capabilities & 0x0200) ? "YES" : "NO");
+//	disp_str("\n");
 
 	int cmd_set_supported = hdinfo[83];
+	hd_info[0].lba48_support = (cmd_set_supported & 0x0400);
 	//printf("LBA48 supported: %s\n",
 	//	(cmd_set_supported & 0x0400) ? "YES" : "NO");
-	disp_str("LBA48 supported: ");
-	disp_str((cmd_set_supported & 0x0400) ? "YES" : "NO");
-	disp_str("\n");
+//	disp_str("LBA48 supported: ");
+//	disp_str((cmd_set_supported & 0x0400) ? "YES" : "NO");
+//	disp_str("\n");
 
 	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
+	hd_info[0].hd_size = sectors * 512;
 	//printf("HD size: %dMB\n", sectors * 512 / 1000000);
-	disp_str("HD size: ");
-	disp_int(sectors * 512 / 1024 / 1024);
-	disp_str("MB\n");
+//	disp_str("HD size: ");
+//	disp_int(sectors * 512 / 1024 / 1024);
+//	disp_str("MB\n");
 }
 
 

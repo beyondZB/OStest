@@ -8,6 +8,7 @@ struct file_descriptor{
 	int fd_mode;
 	int fd_position;
 	struct inode* inode;
+	Device device;
 };
 全局有一个struct file_descriptor fileDescriptor [NR_FD];
 		

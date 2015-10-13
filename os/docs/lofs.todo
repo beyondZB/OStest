@@ -1,0 +1,4 @@
+将deviceInfo的数组移动到global.c 并在内核初始化时候,将其初始化
+
+实现strcmp
+实现strncpy

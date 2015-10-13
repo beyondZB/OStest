@@ -1,0 +1,71 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+EXIT_FAILURE	read_command.h	/^typedef enum{EXIT_SUCCESS,EXIT_FAILURE}state;$/;"	e	enum:__anon1
+EXIT_SUCCESS	read_command.h	/^typedef enum{EXIT_SUCCESS,EXIT_FAILURE}state;$/;"	e	enum:__anon1
+MAP_H	map.h	2;"	d
+MAX_ARG	cpp/read_command.h	7;"	d
+MAX_ARG	read_command.h	3;"	d
+MAX_LEN	map.h	3;"	d
+MAX_LENGTH	mystring.c	4;"	d	file:
+MAX_PARA_LENGTH	read_command.h	4;"	d
+MYSTRING_H	mystring.h	2;"	d
+Parameters	read_command.c	/^char Parameters[MAX_ARG][MAX_PARA_LENGTH];$/;"	v
+TRUE	read_command.h	5;"	d
+_READ_COMMAND_H	cpp/read_command.h	2;"	d
+_READ_COMMAND_H	read_command.h	2;"	d
+__anon2::name	map.h	/^	char name[MAX_LEN];$/;"	m	struct:__anon2	access:public
+__anon2::next	map.h	/^	node *next;$/;"	m	struct:__anon2	access:public
+__anon2::value	map.h	/^	char value[MAX_LEN];$/;"	m	struct:__anon2	access:public
+__anon3::count	map.h	/^	int count;$/;"	m	struct:__anon3	access:public
+__anon3::head	map.h	/^	node *head;$/;"	m	struct:__anon3	access:public
+__anon3::rear	map.h	/^	node *rear;$/;"	m	struct:__anon3	access:public
+charcat	mystring.c	/^char * charcat( char * str, char ch)$/;"	f	signature:( char * str, char ch)
+charcat	mystring.h	/^extern char *charcat(char *str, char ch);$/;"	p	signature:(char *str, char ch)
+count	map.h	/^	int count;$/;"	m	struct:__anon3	access:public
+echo	cpp/read_command.cpp	/^state echo()$/;"	f	signature:()
+echo	cpp/read_command.h	/^extern state echo();$/;"	p	signature:()
+excute_success	cpp/read_command.h	/^enum state {syntax_error, excute_success};$/;"	e	enum:state
+head	map.h	/^	node *head;$/;"	m	struct:__anon3	access:public
+insert	map.c	/^void insert(map *maps,char *name, char *value)$/;"	f	signature:(map *maps,char *name, char *value)
+insert	map.h	/^extern void insert(map *maps,char *name, char *value);$/;"	p	signature:(map *maps,char *name, char *value)
+main	Lsh.c	/^void main()$/;"	f
+main	cpp/Lsh.cpp	/^int main()$/;"	f	signature:()
+main	cpp/test.cpp	/^int main()$/;"	f	signature:()
+map	map.h	/^}map;$/;"	t	typeref:struct:__anon3
+mapstring	cpp/read_command.cpp	/^map<string , string > mapstring;$/;"	v
+mysinput	mystring.c	/^state mysinput(char *str, char stopchar)$/;"	f	signature:(char *str, char stopchar)
+mysinput	mystring.h	/^extern state mysinput(char *str, char stopchar);$/;"	p	signature:(char *str, char stopchar)
+name	map.h	/^	char name[MAX_LEN];$/;"	m	struct:__anon2	access:public
+next	map.h	/^	node *next;$/;"	m	struct:__anon2	access:public
+node	map.h	/^}node;$/;"	t	typeref:struct:__anon2
+outer_command	cpp/read_command.cpp	/^state outer_command()$/;"	f	signature:()
+outer_command	cpp/read_command.h	/^extern state outer_command();$/;"	p	signature:()
+para_length	cpp/read_command.cpp	/^int para_length = 0;$/;"	v
+para_num	read_command.c	/^int para_num;$/;"	v
+read_command	read_command.c	/^state read_command()$/;"	f
+read_command	read_command.h	/^extern state read_command();$/;"	p	signature:()
+read_recommand	cpp/read_command.cpp	/^int read_recommand()$/;"	f	signature:()
+read_recommand	cpp/read_command.h	/^extern int read_recommand();$/;"	p	signature:()
+rear	map.h	/^	node *rear;$/;"	m	struct:__anon3	access:public
+set	cpp/read_command.cpp	/^state set()$/;"	f	signature:()
+set	cpp/read_command.h	/^extern state set();$/;"	p	signature:()
+set	read_command.c	/^state set()$/;"	f
+set	read_command.h	/^extern state set();$/;"	p	signature:()
+state	cpp/read_command.h	/^enum state {syntax_error, excute_success};$/;"	g
+state	read_command.h	/^typedef enum{EXIT_SUCCESS,EXIT_FAILURE}state;$/;"	t	typeref:enum:__anon1
+strclear	mystring.c	/^void strclear(char *str)$/;"	f	signature:(char *str)
+strclear	mystring.h	/^extern void strclear(char * str);$/;"	p	signature:(char * str)
+syntax_error	cpp/read_command.h	/^enum state {syntax_error, excute_success};$/;"	e	enum:state
+value	map.h	/^	char value[MAX_LEN];$/;"	m	struct:__anon2	access:public
+var_cat	cpp/read_command.cpp	/^state var_cat(string &str)$/;"	f	signature:(string &str)
+var_cat	cpp/read_command.h	/^extern state var_cat(string &str);$/;"	p	signature:(string &str)
+var_extention	cpp/read_command.cpp	/^state var_extention(string &str)$/;"	f	signature:(string &str)
+var_extention	cpp/read_command.h	/^extern state var_extention(string &str);$/;"	p	signature:(string &str)
+var_replace	cpp/read_command.cpp	/^state var_replace(int &left_pos,int &right_pos,int &ext_pos,string &str)$/;"	f	signature:(int &left_pos,int &right_pos,int &ext_pos,string &str)
+var_replace	cpp/read_command.h	/^extern state var_replace(int &left_pos,int &right_pos,int &ext_pos,string &str);$/;"	p	signature:(int &left_pos,int &right_pos,int &ext_pos,string &str)
+var_substitute	cpp/read_command.cpp	/^state var_substitute(string &str)$/;"	f	signature:(string &str)
+var_substitute	cpp/read_command.h	/^extern state var_substitute(string &str);$/;"	p	signature:(string &str)

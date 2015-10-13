@@ -1,6 +1,8 @@
-#ifndef	_ORANGES_PROTECT_H_
-#define	_ORANGES_PROTECT_H_
+#ifndef	_PROTECT_H_
+#define	_PROTECT_H_
 
+#include "type.h"
+#include "const.h"
 
 /* 存储段描述符/系统段描述符 */
 typedef struct s_descriptor		/* 共 8 个字节 */
@@ -146,4 +148,4 @@ typedef struct s_tss {
 #define vir2phys(seg_base, vir)	(u32)(((u32)seg_base) + (u32)(vir))
 
 
-#endif /* _ORANGES_PROTECT_H_ */
+#endif /* _PROTECT_H_ */

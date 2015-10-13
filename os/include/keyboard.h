@@ -1,6 +1,8 @@
-#ifndef	KEYBOARD_H
-#define	KEYBOARD_H
+#ifndef	_KEYBOARD_H
+#define	_KEYBOARD_H
 
+#include "type.h"
+#include "const.h"
 
 #define	KB_IN_BYTES	32	/* size of keyboard input buffer */
 #define MAP_COLS	3	/* Number of columns in keymap */
@@ -124,4 +126,4 @@ PUBLIC typedef struct ComboK{
 PUBLIC ComboKey kernelReadComboKey();
 
 #define NUM_DECORATIVE_KEY	6
-#endif /* KEYBOARD_H */
+#endif /* _KEYBOARD_H */

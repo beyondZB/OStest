@@ -1,5 +1,5 @@
-#ifndef CONST_H
-#define CONST_H
+#ifndef _CONST_H
+#define _CONST_H
 
 //EXTERN is defined as extern except in global.c
 //extern 提示编译器在其他模块中寻找定义
@@ -123,4 +123,4 @@
 #define	MAJOR(x)		((x >> MAJOR_SHIFT) & 0xFF)
 #define	MINOR(x)		(x & 0xFF)
 
-#endif /*CONST_H*/
+#endif /*_CONST_H*/

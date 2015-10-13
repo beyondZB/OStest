@@ -1,4 +1,9 @@
+#ifndef	_PROTO_H
+#define	_PROTO_H	
 
+#include "type.h"
+#include "const.h"
+#include "hd.h"
 
 /* kliba.asm */
 PUBLIC void	out_byte(u16 port, u8 value);
@@ -63,11 +68,10 @@ PUBLIC VirtualKey readKey();
 PUBLIC void block();
 PUBLIC void unBlock(u32 pid);
 PUBLIC void hdClose(u32 device);
+PUBLIC struct hd_info* hdOpen(u32 device);
 PUBLIC void hdRead(u32 device, u64 position, u32 count, char* buf);
 PUBLIC void hdWrite(u32 device, u64 position, u32 count, char* buf);
 PUBLIC void hdIoctl(u32 device, u32 request, char* buf);
-
-
 
 
 
@@ -84,3 +88,4 @@ PUBLIC void kernelHdIoctl(u32 device, u32 request, char* buf);
 PUBLIC int sysHdWrite(u32 device, u64 position, u32 count, char* buf);
 PUBLIC void kernelHdWrite(u32 device, u64 position, u32 count, char* buf);
 
+#endif	//_PROTO_H

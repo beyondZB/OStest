@@ -2,4 +2,5 @@
 2.写一个sysFun
 3.写一个fun
 4.把所有函数头都加到proto.h
-4.把sysFun加到global.c的sys_call_table
+5.const.h中修改NR_SYS_CALL值
+6.把sysFun加到global.c的sys_call_table

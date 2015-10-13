@@ -1,5 +1,3 @@
-#include "type.h"
-#include "const.h"
 #include "protect.h"
 #include "proto.h"
 #include "string.h"
@@ -26,9 +24,9 @@ PUBLIC VirtualKey readKey(){
 	return (VirtualKey)( system_call(NR_SYS_READ_KEY, 0, 0, 0, 0, 0) );
 }
 
-PUBLIC void hdOpen(int device)
+PUBLIC struct hd_info* hdOpen(u32 device)
 {
-	system_call(NR_SYS_HD_OPEN, device, 0, 0, 0, 0);
+	return (struct hd_info*)system_call(NR_SYS_HD_OPEN, device, 0, 0, 0, 0);
 }
 
 PUBLIC void block()

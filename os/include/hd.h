@@ -1,5 +1,8 @@
-#ifndef HD_H
-#define HD_H
+#ifndef _HD_H
+#define _HD_H
+
+#include "type.h"
+#include "const.h"
 
 struct part_ent {
 	u8 boot_ind;		/**
@@ -131,7 +134,11 @@ struct hd_info
 	int			open_cnt;
 	struct part_info	primary[NR_PRIM_PER_DRIVE];
 	struct part_info	logical[NR_SUB_PER_DRIVE];
+
+	bool lba_support;
+	bool lba48_support;
+	u64 hd_size;
 };
 
 
-#endif	/* HD_H */
+#endif	/* _HD_H */

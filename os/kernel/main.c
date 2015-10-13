@@ -1,5 +1,3 @@
-#include "type.h"
-#include "const.h"
 #include "protect.h"
 #include "proto.h"
 #include "string.h"
@@ -7,6 +5,7 @@
 #include "global.h"
 #include "keyboard.h"
 #include "hd.h"
+//**#include "fs.h"
 
 PUBLIC int kernel_main()
 {
@@ -49,7 +48,11 @@ PUBLIC int kernel_main()
 		p_proc->regs.eflags = 0x3202;	//IF = 1, IOPL = 3; bit 2 is always 1.
 		p_proc->regs.task_kernel_stack = (u32)p_task_kernel_stack;
 		p_proc->regs.task_regs_backup = (u32)&(p_proc->regs_backup);
-
+		
+//**		//初始化fdp_table
+//**		int j = 0;
+//**		for(j = 0; j < NR_FDP; j++)
+//**			memset(&fdp_table[j], 0, sizeof(FILE_DESCRIPTOR));
 
 		p_task_stack -= p_task->stacksize;
 		p_task_kernel_stack -= p_task->kernelStackSize;
@@ -63,6 +66,7 @@ PUBLIC int kernel_main()
 
 	p_proc_ready	= proc_table;			//p_proc_ready指向第一个PROCESS
 	
+//**	init_fs();
 	init_clock();
 	init_keyboard();
 	init_hd();
@@ -95,7 +99,10 @@ void TestA()
 //	disp_str("(void*)TestA: ");
 //	disp_int((void*) TestA);
 //	disp_str("\n");
-	hdOpen(0);
+	struct hd_info* hdi = hdOpen(0);
+	disp_str("hd_size: ");
+	disp_int(hdi->hd_size);
+	disp_str("\n");
 //	block();
 //	struct part_info pti;
 //	hdIoctl(1, DIOCTL_GET_GEO, &pti);
@@ -107,15 +114,15 @@ void TestA()
 //	disp_str("\n");
 
 
-//	char r[6] = "66666";
-//	hdRead(0, 0x0, 6, r);
-//	disp_str("readed\n");
-//	disp_str(r);
-//	disp_str("\n");
+	char r[6] = "66666";
+	hdRead(0, 0x0, 6, r);
+	disp_str("readed\n");
+	disp_str(r);
+	disp_str("\n");
 	
-	char* w = "12345";
-	hdWrite(0, 0x0, 6, w);
-	disp_str("writed\n");
+//	char* w = "12345";
+//	hdWrite(0, 0x0, 6, w);
+//	disp_str("writed\n");
 	
 	while(1){
 	disp_str("A");

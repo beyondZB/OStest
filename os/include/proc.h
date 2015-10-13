@@ -1,3 +1,10 @@
+#ifndef _PROC_H
+#define _PROC_H
+
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	gs;		/* ┓stackbase					│			*/
 	u32	fs;		/* ┃						│			*/
@@ -21,6 +28,7 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	task_regs_backup;
 }STACK_FRAME;
 
+#define	NR_FDP	10
 /* s_proc也就是我们常说的进程表或者PCB,保存在堆栈中
    内容包括保存在栈中的寄存器,gdt中的LDT选择子,LDT中的选择子,ticks，优先级，pid,进程名*/
 typedef struct s_proc {
@@ -29,6 +37,7 @@ typedef struct s_proc {
 	u16 ldt_sel;               /* gdt selector giving ldt base and limit */
 	DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
 	STACK_FRAME regs_backup;   /* backup for system call regs backing up*/
+//**	FILE_DESCRIPTOR* fdp_table[NR_FDP]; /* file descriptor pointer table */
 
 	u32 pid;                   /* process id passed in from MM */
 	char p_name[16];           /* name of the process */
@@ -65,3 +74,5 @@ typedef struct s_task{
 #define KERNEL_STACK_SIZE_TOTAL	(KERNEL_STACK_SIZE_IDLE + \
 				KERNEL_STACK_SIZE_TESTA + \
 				KERNEL_STACK_SIZE_TESTB)
+
+#endif	//_PROC_H

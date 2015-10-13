@@ -1,0 +1,31 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+MAX_ARG	read_command.h	7;"	d
+_READ_COMMAND_H	read_command.h	2;"	d
+echo	read_command.cpp	/^state echo()$/;"	f	signature:()
+echo	read_command.h	/^extern state echo();$/;"	p	signature:()
+excute_success	read_command.h	/^enum state {syntax_error, excute_success};$/;"	e	enum:state
+main	Lsh.cpp	/^int main()$/;"	f	signature:()
+main	test.cpp	/^int main()$/;"	f	signature:()
+mapstring	read_command.cpp	/^map<string , string > mapstring;$/;"	v
+outer_command	read_command.cpp	/^state outer_command()$/;"	f	signature:()
+outer_command	read_command.h	/^extern state outer_command();$/;"	p	signature:()
+para_length	read_command.cpp	/^int para_length = 0;$/;"	v
+read_recommand	read_command.cpp	/^int read_recommand()$/;"	f	signature:()
+read_recommand	read_command.h	/^extern int read_recommand();$/;"	p	signature:()
+set	read_command.cpp	/^state set()$/;"	f	signature:()
+set	read_command.h	/^extern state set();$/;"	p	signature:()
+state	read_command.h	/^enum state {syntax_error, excute_success};$/;"	g
+syntax_error	read_command.h	/^enum state {syntax_error, excute_success};$/;"	e	enum:state
+var_cat	read_command.cpp	/^state var_cat(string &str)$/;"	f	signature:(string &str)
+var_cat	read_command.h	/^extern state var_cat(string &str);$/;"	p	signature:(string &str)
+var_extention	read_command.cpp	/^state var_extention(string &str)$/;"	f	signature:(string &str)
+var_extention	read_command.h	/^extern state var_extention(string &str);$/;"	p	signature:(string &str)
+var_replace	read_command.cpp	/^state var_replace(int &left_pos,int &right_pos,int &ext_pos,string &str)$/;"	f	signature:(int &left_pos,int &right_pos,int &ext_pos,string &str)
+var_replace	read_command.h	/^extern state var_replace(int &left_pos,int &right_pos,int &ext_pos,string &str);$/;"	p	signature:(int &left_pos,int &right_pos,int &ext_pos,string &str)
+var_substitute	read_command.cpp	/^state var_substitute(string &str)$/;"	f	signature:(string &str)
+var_substitute	read_command.h	/^extern state var_substitute(string &str);$/;"	p	signature:(string &str)

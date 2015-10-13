@@ -1,0 +1,15 @@
+要注意先多分配一些空的PCB，以便用户进程使用
+要在PCB中多加一个tty号
+kernelCreateProcess:
+拷贝代码到适当位置(利用新写的文件系统调fileOpen,fileRead找到文件，并放入内存)
+，设置PCB，
+
+注意	将用户进程状态设置为ready，
+	还有在整个函数中关中断，
+	在kernelSchedule中要注意再加一个判断PCB是否合法（最好在process state中再加一个非法状态），即是否为空
+	堆是一次性分配给CRT的，再由CRT分配给用户进程；
+
+kernelExitProcess:
+将PCB清零（process state中的非法状态最好设置为0，这样在清零的同时就设置了非法状态），调用kernelShift切换进程
+
+注意	在整个函数中关中断
