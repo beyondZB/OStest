@@ -1,0 +1,12 @@
+project:
+    name: mbr
+    version: 0.0.1
+    type: cpp
+
+make:
+    configuration:
+        compiler:
+            asm:
+                with_object_ext: false
+        linker:
+            autolink: false

@@ -1,0 +1,25 @@
+all: /home/beyond/project/OStest/LessOS/kernel/target/kernel-0.0.1
+
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/klib.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/device.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/stringc.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/platform/LessOS/device.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/clock.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/keyboard.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/i8259.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/proc.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/api.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/lofs.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/start.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/buffer.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/global.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/tty.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/protect.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/vkey.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/main.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/hd.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/string.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/kliba.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/kernel.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel/syscall.mk
+-include /home/beyond/project/OStest/LessOS/kernel/target/submake/final_target.mk

@@ -1,0 +1,17 @@
+project:
+    name: userProc
+    version: 0.0.1
+    type: cpp
+
+make:
+    configuration:
+        compiler:
+            c:
+                flags: -fno-builtin -m32 -fno-stack-protector
+                include_paths: ["/home/beyond/project/OStest/LessOS/lcrt/include/main"]
+            asm:
+                flags: -f elf
+        linker:
+            autolink: false
+            ld: ld
+            flags: -s -Ttext 0x700000 -m elf_i386

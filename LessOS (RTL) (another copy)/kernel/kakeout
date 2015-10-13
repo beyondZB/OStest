@@ -1,0 +1,25 @@
+[INFO] Enter phase: Make
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib/platform/LessOS
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/lib
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[DEBUG] Skip creating exists directory: /home/beyond/project/OStest/LessOS/kernel/target/submake/main/kernel
+[INFO] Exit phase: Make
+[INFO] Enter phase: Build
+mkdir -p /home/beyond/project/OStest/LessOS/kernel/target/object/main/kernel
+gcc -fno-builtin -m32 -fno-stack-protector -c -o /home/beyond/project/OStest/LessOS/kernel/target/object/main/kernel/lofs.o -I/home/beyond/project/OStest/LessOS/kernel/include/main/ /home/beyond/project/OStest/LessOS/kernel/src/main/kernel/lofs.c
+[INFO] Exit phase: Build
